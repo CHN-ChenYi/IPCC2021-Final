@@ -3,6 +3,7 @@
 ** @brief: Dslash and Dlash-dagger operaters.
 **/
 
+#include <numa.h>
 #include <mpi.h>
 #include "dslash.h"
 #include "operator.h"
@@ -109,10 +110,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     MPI_Status stas[8 * size];
     MPI_Status star[8 * size];
 
-    int len_x_f = (subgrid[1] * subgrid[2] * subgrid[3] + cb) >> 1;
+    const int len_x_f = (subgrid[1] * subgrid[2] * subgrid[3] + cb) >> 1;
+    const size_t len_x_f_size = len_x_f * 6 * 2 * sizeof(double);
 
-    double *resv_x_f = new double[len_x_f * 6 * 2];
-    double *send_x_b = new double[len_x_f * 6 * 2];
+    static double *resv_x_f = reinterpret_cast<double *>(numa_alloc_local(len_x_f_size));
+    static double *send_x_b = reinterpret_cast<double *>(numa_alloc_local(len_x_f_size));
+    // static double *resv_x_f = new double[len_x_f * 6 * 2];
+    // static double *send_x_b = new double[len_x_f * 6 * 2];
     if (N_sub[0] != 1) {
         for (int i = 0; i < len_x_f * 6 * 2; i++) {
             send_x_b[i] = 0;
@@ -154,10 +158,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
                   MPI_COMM_WORLD, &reqr[8 * nodenum_x_f]);
     }
 
-    int len_x_b = (subgrid[1] * subgrid[2] * subgrid[3] + 1 - cb) >> 1;
+    const int len_x_b = (subgrid[1] * subgrid[2] * subgrid[3] + 1 - cb) >> 1;
+    const size_t len_x_b_size = len_x_b * 6 * 2 * sizeof(double);
 
-    double *resv_x_b = new double[len_x_b * 6 * 2];
-    double *send_x_f = new double[len_x_b * 6 * 2];
+    static double *resv_x_b = reinterpret_cast<double *>(numa_alloc_local(len_x_b_size));
+    static double *send_x_f = reinterpret_cast<double *>(numa_alloc_local(len_x_b_size));
+    // static double *resv_x_b = new double[len_x_b * 6 * 2];
+    // static double *send_x_f = new double[len_x_b * 6 * 2];
 
     if (N_sub[0] != 1) {
         for (int i = 0; i < len_x_b * 6 * 2; i++) {
@@ -214,10 +221,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
                   MPI_COMM_WORLD, &reqr[8 * nodenum_x_b + 1]);
     }
 
-    int len_y_f = subgrid[0] * subgrid[2] * subgrid[3];
+    const int len_y_f = subgrid[0] * subgrid[2] * subgrid[3];
+    const size_t len_y_f_size = len_y_f * 6 * 2 * sizeof(double);
 
-    double *resv_y_f = new double[len_y_f * 6 * 2];
-    double *send_y_b = new double[len_y_f * 6 * 2];
+    static double *resv_y_f = reinterpret_cast<double *>(numa_alloc_local(len_y_f_size));
+    static double *send_y_b = reinterpret_cast<double *>(numa_alloc_local(len_y_f_size));
+    // static double *resv_y_f = new double[len_y_f * 6 * 2];
+    // static double *send_y_b = new double[len_y_f * 6 * 2];
     if (N_sub[1] != 1) {
         for (int i = 0; i < len_y_f * 6 * 2; i++) {
             send_y_b[i] = 0;
@@ -256,10 +266,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
                   MPI_COMM_WORLD, &reqr[8 * nodenum_y_f + 2]);
     }
 
-    int len_y_b = subgrid[0] * subgrid[2] * subgrid[3];
+    const int len_y_b = subgrid[0] * subgrid[2] * subgrid[3];
+    const size_t len_y_b_size = len_y_b * 6 * 2 * sizeof(double);
 
-    double *resv_y_b = new double[len_y_b * 6 * 2];
-    double *send_y_f = new double[len_y_b * 6 * 2];
+    static double *resv_y_b = reinterpret_cast<double *>(numa_alloc_local(len_y_b_size));
+    static double *send_y_f = reinterpret_cast<double *>(numa_alloc_local(len_y_b_size));
+    // static double *resv_y_b = new double[len_y_b * 6 * 2];
+    // static double *send_y_f = new double[len_y_b * 6 * 2];
 
     if (N_sub[1] != 1) {
 
@@ -310,10 +323,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
                   MPI_COMM_WORLD, &reqr[8 * nodenum_y_b + 3]);
     }
 
-    int len_z_f = subgrid[0] * subgrid[1] * subgrid[3];
+    const int len_z_f = subgrid[0] * subgrid[1] * subgrid[3];
+    const size_t len_z_f_size = len_z_f * 6 * 2 * sizeof(double);
 
-    double *resv_z_f = new double[len_z_f * 6 * 2];
-    double *send_z_b = new double[len_z_f * 6 * 2];
+    static double *resv_z_f = reinterpret_cast<double *>(numa_alloc_local(len_z_f_size));
+    static double *send_z_b = reinterpret_cast<double *>(numa_alloc_local(len_z_f_size));
+    // static double *resv_z_f = new double[len_z_f * 6 * 2];
+    // static double *send_z_b = new double[len_z_f * 6 * 2];
     if (N_sub[2] != 1) {
         for (int i = 0; i < len_z_f * 6 * 2; i++) {
             send_z_b[i] = 0;
@@ -353,10 +369,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
                   MPI_COMM_WORLD, &reqr[8 * nodenum_z_f + 4]);
     }
 
-    int len_z_b = subgrid[0] * subgrid[1] * subgrid[3];
+    const int len_z_b = subgrid[0] * subgrid[1] * subgrid[3];
+    const size_t len_z_b_size = len_z_b * 6 * 2 * sizeof(double);
 
-    double *resv_z_b = new double[len_z_b * 6 * 2];
-    double *send_z_f = new double[len_z_b * 6 * 2];
+    static double *resv_z_b = reinterpret_cast<double *>(numa_alloc_local(len_z_b_size));
+    static double *send_z_f = reinterpret_cast<double *>(numa_alloc_local(len_z_b_size));
+    // static double *resv_z_b = new double[len_z_b * 6 * 2];
+    // static double *send_z_f = new double[len_z_b * 6 * 2];
     if (N_sub[2] != 1) {
 
         for (int i = 0; i < len_z_b * 6 * 2; i++) {
@@ -406,10 +425,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
                   MPI_COMM_WORLD, &reqr[8 * nodenum_z_b + 5]);
     }
 
-    int len_t_f = subgrid[0] * subgrid[1] * subgrid[2];
+    const int len_t_f = subgrid[0] * subgrid[1] * subgrid[2];
+    const size_t len_t_f_size = len_t_f * 6 * 2 * sizeof(double);
 
-    double *resv_t_f = new double[len_t_f * 6 * 2];
-    double *send_t_b = new double[len_t_f * 6 * 2];
+    static double *resv_t_f = reinterpret_cast<double *>(numa_alloc_local(len_t_f_size));
+    static double *send_t_b = reinterpret_cast<double *>(numa_alloc_local(len_t_f_size));
+    // static double *resv_t_f = new double[len_t_f * 6 * 2];
+    // static double *send_t_b = new double[len_t_f * 6 * 2];
     if (N_sub[3] != 1) {
         for (int i = 0; i < len_t_f * 6 * 2; i++) {
             send_t_b[i] = 0;
@@ -449,10 +471,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
                   MPI_COMM_WORLD, &reqr[8 * nodenum_t_f + 6]);
     }
 
-    int len_t_b = subgrid[0] * subgrid[1] * subgrid[2];
+    const int len_t_b = subgrid[0] * subgrid[1] * subgrid[2];
+    const size_t len_t_b_size = len_t_b * 6 * 2 * sizeof(double);
 
-    double *resv_t_b = new double[len_t_b * 6 * 2];
-    double *send_t_f = new double[len_t_b * 6 * 2];
+    static double *resv_t_b = reinterpret_cast<double *>(numa_alloc_local(len_t_b_size));
+    static double *send_t_f = reinterpret_cast<double *>(numa_alloc_local(len_t_b_size));
+    // static double *resv_t_b = new double[len_t_b * 6 * 2];
+    // static double *send_t_f = new double[len_t_b * 6 * 2];
     if (N_sub[3] != 1) {
 
         for (int i = 0; i < len_t_b * 6 * 2; i++) {
@@ -1057,7 +1082,6 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         }
 
         MPI_Wait(&reqs[8 * rank + 3], &stas[8 * rank + 3]);
-
     }
 
     //    delete[] send_y_f;
@@ -1191,7 +1215,6 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         }
 
         MPI_Wait(&reqs[8 * rank + 6], &stas[8 * rank + 6]);
-
     }
 
     if (N_sub[3] != 1) {
@@ -1227,23 +1250,23 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    delete[] send_x_b;
-    delete[] resv_x_f;
-    delete[] send_x_f;
-    delete[] resv_x_b;
+    // delete[] send_x_b;
+    // delete[] resv_x_f;
+    // delete[] send_x_f;
+    // delete[] resv_x_b;
 
-    delete[] send_y_b;
-    delete[] resv_y_f;
-    delete[] send_y_f;
-    delete[] resv_y_b;
+    // delete[] send_y_b;
+    // delete[] resv_y_f;
+    // delete[] send_y_f;
+    // delete[] resv_y_b;
 
-    delete[] send_z_b;
-    delete[] resv_z_f;
-    delete[] send_z_f;
-    delete[] resv_z_b;
+    // delete[] send_z_b;
+    // delete[] resv_z_f;
+    // delete[] send_z_f;
+    // delete[] resv_z_b;
 
-    delete[] send_t_b;
-    delete[] resv_t_f;
-    delete[] send_t_f;
-    delete[] resv_t_b;
+    // delete[] send_t_b;
+    // delete[] resv_t_f;
+    // delete[] send_t_f;
+    // delete[] resv_t_b;
 }

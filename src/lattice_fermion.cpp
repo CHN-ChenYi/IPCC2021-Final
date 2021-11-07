@@ -5,6 +5,7 @@
 
 #include "lattice_fermion.h"
 #include <iostream>
+#include <numa.h>
 using namespace std;
 
 //lattice_fermion::lattice_fermion(LatticeFermion &chroma_fermi) {
@@ -25,14 +26,20 @@ lattice_fermion::lattice_fermion(int *subgs1, int *site_vec1)
     subgs = subgs1;
     site_vec = site_vec1;
     size = subgs[0] * subgs[1] * subgs[2] * subgs[3] * 3 * 4;
-    A = new std::complex<double>[size]();
+    const size_t A_size = sizeof(complex<double>) * size;
+    // A = new std::complex<double>[size]();
+    A = reinterpret_cast<complex<double> *>(numa_alloc_local(A_size));
     mem_flag = true;
 }
 
 lattice_fermion::~lattice_fermion()
 {
-    if (mem_flag)
-        delete[] A;
+    if (mem_flag) {
+        const size_t A_size =
+            sizeof(complex<double>) * subgs[0] * subgs[1] * subgs[2] * subgs[3] * 3 * 4;
+        numa_free(A, A_size);
+        // delete[] A;
+    }
     A = NULL;
     subgs = NULL;
     site_vec = NULL;

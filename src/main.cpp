@@ -11,6 +11,7 @@
 #include "check.h"
 #include <string>
 #include <iostream>
+#include <numa.h>
 
 using namespace std;
 
@@ -85,6 +86,8 @@ int main(int argc, char **argv)
     }
 
     // WALL TIME START;
+    numa_set_strict(true);
+    numa_set_localalloc();
     double start_t = MPI_Wtime();
 
     // make source

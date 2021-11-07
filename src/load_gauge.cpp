@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <numa.h>
 #include "sys/stat.h"
 using namespace std;
 
@@ -92,7 +93,9 @@ int load_gauge(std::complex<double> *gauge[4], std::string &filename, int *subgs
 
         int Offset0 = offset - endinfo;
         int Offset = Offset0;
-        double *U4 = new double[Vsub * 72];
+        // double *U4 = new double[Vsub * 72];
+        const size_t U4_size = sizeof(double) * Vsub * 72;
+        double *U4 = reinterpret_cast<double *>(numa_alloc_local(U4_size));
         int xg[4] = {0}; // global site;
         int xs[4] = {0}; // local (sub) site;
         int idx_sub = 0;
@@ -113,7 +116,7 @@ int load_gauge(std::complex<double> *gauge[4], std::string &filename, int *subgs
                 xg[2] = xg0[2] + xs[2];
                 for (xs[1] = 0; xs[1] < subgs[1]; xs[1]++) {
                     xg[1] = xg0[1] + xs[1];
-		    xg[0] = xg0[0];
+                    xg[0] = xg0[0];
                     idx_sub = site2index(xs, subgs);
                     Offset = Offset0 + 72 * sizeof(double) * site2index(xg, site_vec);
 #ifndef NO_MPI_IO
@@ -174,7 +177,8 @@ int load_gauge(std::complex<double> *gauge[4], std::string &filename, int *subgs
             }
         }
 #endif
-        delete[] U4;
+        // delete[] U4;
+        numa_free(U4, U4_size);
     }
 
     return 0;

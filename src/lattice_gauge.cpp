@@ -4,6 +4,7 @@
 **/
 
 #include <mpi.h>
+#include <numa.h>
 #include "lattice_gauge.h"
 #include "operator.h"
 using namespace std;
@@ -36,17 +37,23 @@ lattice_gauge::lattice_gauge(int *subgs1, int *site_vec1)
     subgs = subgs1;
     site_vec = site_vec1;
     size = subgs[0] * subgs[1] * subgs[2] * subgs[3] * 3 * 3;
+    const size_t A_i_size = sizeof(complex<double>) * size;
     for (int i = 0; i < 4; i++) {
-        A[i] = new complex<double>[size]();
+        // A[i] = new complex<double>[size]();
+        A[i] = reinterpret_cast<complex<double> *>(numa_alloc_local(A_i_size));
     }
     mem_flag = true;
 }
 
 lattice_gauge::~lattice_gauge()
 {
-    if (mem_flag)
+    if (mem_flag) {
+        const size_t A_i_size =
+            sizeof(complex<double>) * subgs[0] * subgs[1] * subgs[2] * subgs[3] * 3 * 3;
         for (int i = 0; i < 4; i++)
-            delete[] A[i];
+            numa_free(A[i], A_i_size);
+        // delete[] A[i];
+    }
 }
 
 // ll=color_row; // mm=color_rank // dd=dir
