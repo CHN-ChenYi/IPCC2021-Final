@@ -1,7 +1,7 @@
 CC       = mpicc
 CXX      = mpicxx
 
-CXX_FLAGS = -fPIC -I../include  -std=c++11
+CXX_FLAGS = -fPIC -I../include -std=c++11 -Ofast -ffast-math -march=core-avx2 -fomit-frame-pointer
 #CXX_FLAGS = -fPIC -I../include -DVERBOSE_SIMPLE
 #CXX_FLAGS = -fPIC -I../include -DDEBUG -DLIME -NO_MPI_IO -g
 LINK_FLAGS = -lmpi
@@ -26,10 +26,10 @@ fmt:
 	@#cd .. && git ls-files -- '*.cpp' '*.h' | xargs clang-format -i -style=file
 	find .. -name "*.cpp" -or -name "*.h" | xargs clang-format -i -style=file
 
-run:
+run: all
 	# mpirun -n 4 ./main  0.005  UNIT  24 24 24 96   12 12 24 48
 	sbatch sub.sh
-	squeue1
+	squeue
 
 clean:
 	rm -rf ${SLIB} ${OBJS} ${TARGET}
