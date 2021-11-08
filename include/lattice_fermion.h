@@ -22,6 +22,7 @@ class lattice_fermion {
     ~lattice_fermion();
     lattice_fermion &operator-(const lattice_fermion &a);
     lattice_fermion &operator+(const lattice_fermion &a);
+    void operator+=(const lattice_fermion &a);
 
     void clean();
 
