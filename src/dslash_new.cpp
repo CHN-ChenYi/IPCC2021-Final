@@ -121,9 +121,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
             send_x_b[i] = 0;
         }
 
-        int cont = 0;
+        // int cont = 0;
 
-        // #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -137,8 +137,11 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                      subgrid[0] * subgrid[1] * z + subgrid[0] * y +
                                                      x + (1 - cb) * subgrid_vol_cb) *
                                                         12;
-                    int b = cont * 6;
-                    cont += 1;
+
+                    // int b = cont * 6;
+                    // cont += 1;
+                    const int cont = (y * subgrid[2] * subgrid[3] + z * subgrid[3] + t) / 2;
+                    const int b = cont * 6;
 
                     for (int c2 = 0; c2 < 3; c2++) {
                         tmp = -(srcO[0 * 3 + c2] - flag * I * srcO[3 * 3 + c2]) * half;
@@ -169,9 +172,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
             send_x_f[i] = 0;
         }
 
-        int cont = 0;
+        // int cont = 0;
 
-        // #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -193,8 +196,11 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     complex<double> tmp;
 
-                    int b = cont * 6;
-                    cont += 1;
+                    // int b = cont * 6;
+                    // cont += 1;
+                    const int cont = (y * subgrid[2] * subgrid[3] + z * subgrid[3] + t) / 2;
+                    const int b = cont * 6;
+
                     for (int c1 = 0; c1 < 3; c1++) {
                         for (int c2 = 0; c2 < 3; c2++) {
                             tmp = -(srcO[0 * 3 + c2] + flag * I * srcO[3 * 3 + c2]) * half *
@@ -921,8 +927,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         MPI_Wait(&reqr[8 * nodenum_x_f], &star[8 * nodenum_x_f]);
 
-        int cont = 0;
-        // #pragma omp parallel for collapse(2)
+        // int cont = 0;
+
+#pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -936,9 +943,11 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     int x = subgrid[0] - 1;
 
-                    complex<double> *srcO = (complex<double> *) (&resv_x_f[cont * 6 * 2]);
+                    // complex<double> *srcO = (complex<double> *) (&resv_x_f[cont * 6 * 2]);
+                    // cont += 1;
 
-                    cont += 1;
+                    const int cont = (y * subgrid[2] * subgrid[3] + z * subgrid[3] + t) / 2;
+                    complex<double> *srcO = (complex<double> *) (&resv_x_f[cont * 6 * 2]);
 
                     destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
                                       subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
@@ -975,9 +984,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         MPI_Wait(&reqr[8 * nodenum_x_b + 1], &star[8 * nodenum_x_b + 1]);
 
-        int cont = 0;
+        // int cont = 0;
 
-        // #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -987,8 +996,12 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     int x = 0;
 
+                    // complex<double> *srcO = (complex<double> *) (&resv_x_b[cont * 6 * 2]);
+                    // cont += 1;
+
+                    const int cont = (y * subgrid[2] * subgrid[3] + z * subgrid[3] + t) / 2;
                     complex<double> *srcO = (complex<double> *) (&resv_x_b[cont * 6 * 2]);
-                    cont += 1;
+
 
                     complex<double> *destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
                                                        subgrid[0] * subgrid[1] * z +
