@@ -47,7 +47,7 @@ std::complex<double> vector_p(const T &r1, const T &r2)
     // double sum_r = s1.real(); //fix
     // double sum_i = s1.imag();
     double sum_r = 0.0, sum_i = 0.0;
-#pragma omp parallel for reduction(+ : sum_r, + : sum_i)
+#pragma omp parallel for reduction(+ : sum_r, sum_i)
     for (int i = 0; i < r1.size; i++) {
         sum_r += r1.A[i].real() * r2.A[i].real() + r1.A[i].imag() * r2.A[i].imag();
         sum_i += r1.A[i].real() * r2.A[i].imag() - r1.A[i].imag() * r2.A[i].real();
