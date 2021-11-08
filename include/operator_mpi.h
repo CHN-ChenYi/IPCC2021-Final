@@ -15,11 +15,16 @@ double norm_2(const T &s)
     //    int rank;
     //    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     //if (rank==0){
-    std::complex<double> s1(0.0, 0.0);
+    // std::complex<double> s1(0.0, 0.0);
+    // for (int i = 0; i < s.size; i++) {
+    //     s1 += s.A[i] * conj(s.A[i]);
+    // }
+    // double sum_n = s1.real();
+    double sum_n = 0.0;
+#pragma omp parallel for reduction(+ : sum_n)
     for (int i = 0; i < s.size; i++) {
-        s1 += s.A[i] * conj(s.A[i]);
+        sum_n += pow(s.A[i].real(), 2) + pow(s.A[i].imag(), 2);
     }
-    double sum_n = s1.real();
     double sum;
     MPI_Reduce(&sum_n, &sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Bcast(&sum, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -35,12 +40,18 @@ double norm_2(const T &s)
 template <typename T>
 std::complex<double> vector_p(const T &r1, const T &r2)
 {
-    std::complex<double> s1(0.0, 0.0);
+    // std::complex<double> s1(0.0, 0.0);
+    // for (int i = 0; i < r1.size; i++) {
+    //     s1 += (conj(r1.A[i]) * r2.A[i]);
+    // }
+    // double sum_r = s1.real(); //fix
+    // double sum_i = s1.imag();
+    double sum_r = 0.0, sum_i = 0.0;
+#pragma omp parallel for reduction(+ : sum_r, + : sum_i)
     for (int i = 0; i < r1.size; i++) {
-        s1 += (conj(r1.A[i]) * r2.A[i]);
+        sum_r += r1.A[i].real() * r2.A[i].real() + r1.A[i].imag() * r2.A[i].imag();
+        sum_i += r1.A[i].real() * r2.A[i].imag() - r1.A[i].imag() * r2.A[i].real();
     }
-    double sum_r = s1.real(); //fix
-    double sum_i = s1.imag();
     double sumr;
     double sumi;
     MPI_Reduce(&sum_r, &sumr, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);

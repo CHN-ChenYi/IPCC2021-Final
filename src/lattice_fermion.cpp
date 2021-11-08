@@ -40,6 +40,7 @@ lattice_fermion::~lattice_fermion()
 
 void lattice_fermion::clean()
 {
+#pragma omp parallel for
     for (int i = 0; i < size; i++) {
         A[i] = 0;
     }
@@ -47,6 +48,7 @@ void lattice_fermion::clean()
 
 lattice_fermion &lattice_fermion::operator-(const lattice_fermion &a)
 {
+#pragma omp parallel for
     for (int i = 0; i < size; i++) {
         this->A[i] = this->A[i] - a.A[i];
     }
@@ -55,6 +57,7 @@ lattice_fermion &lattice_fermion::operator-(const lattice_fermion &a)
 
 lattice_fermion &lattice_fermion::operator+(const lattice_fermion &a)
 {
+#pragma omp parallel for
     for (int i = 0; i < size; i++) {
         this->A[i] = this->A[i] + a.A[i];
     }
@@ -115,6 +118,7 @@ complex<double> lattice_fermion::peeksite(vector<int> site,
 void Minus(lattice_fermion &src1, lattice_fermion &src2, lattice_fermion &a)
 {
     a.clean();
+#pragma omp parallel for
     for (int i = 0; i < src1.size; i++) {
         a.A[i] = src1.A[i] - src2.A[i];
     }
@@ -123,6 +127,7 @@ void Minus(lattice_fermion &src1, lattice_fermion &src2, lattice_fermion &a)
 void Plus(lattice_fermion &src1, lattice_fermion &src2, lattice_fermion &a)
 {
     a.clean();
+#pragma omp parallel for
     for (int i = 0; i < src1.size; i++) {
         a.A[i] = src1.A[i] + src2.A[i];
     }
