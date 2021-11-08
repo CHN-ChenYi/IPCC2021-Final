@@ -1,6 +1,9 @@
 #!/bin/bash
 #SBATCH -p amd_256
-#SBATCH -N 2
-#SBATCH -n 128
-mpirun ./main 0.005  ../data/ipcc_gauge_24_72  24 24 24 72  6 12 12 9
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=2
+#SBATCH --cpus-per-task=32
 
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+mpirun ./main 0.005  ../data/ipcc_gauge_24_72  24 24 24 72  12 24 24 36
+# mpirun --bind-to none ./main 0.005  ../data/ipcc_gauge_24_72  24 24 24 72  12 24 24 36

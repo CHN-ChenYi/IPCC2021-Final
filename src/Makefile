@@ -1,7 +1,7 @@
 CC       = mpicc
 CXX      = mpicxx
 
-CXX_FLAGS = -fPIC -I../include -std=c++11 -Ofast -ffast-math -march=core-avx2 -fomit-frame-pointer
+CXX_FLAGS = -fPIC -I../include -std=c++11 -Ofast -ffast-math -march=core-avx2 -fomit-frame-pointer -fopenmp
 #CXX_FLAGS = -fPIC -I../include -DVERBOSE_SIMPLE
 #CXX_FLAGS = -fPIC -I../include -DDEBUG -DLIME -NO_MPI_IO -g
 LINK_FLAGS = -lmpi

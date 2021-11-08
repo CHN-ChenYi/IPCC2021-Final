@@ -16,6 +16,7 @@ void DslashEE(lattice_fermion &src, lattice_fermion &dest, const double mass)
     int subgrid_vol = (src.subgs[0] * src.subgs[1] * src.subgs[2] * src.subgs[3]);
     int subgrid_vol_cb = (subgrid_vol) >> 1;
 
+#pragma omp parallel for
     for (int i = 0; i < subgrid_vol_cb * 3 * 4; i++) {
         dest.A[i] = (a + mass) * src.A[i];
     }
@@ -29,6 +30,7 @@ void DslashOO(lattice_fermion &src, lattice_fermion &dest, const double mass)
     int subgrid_vol = (src.subgs[0] * src.subgs[1] * src.subgs[2] * src.subgs[3]);
     int subgrid_vol_cb = (subgrid_vol) >> 1;
 
+#pragma omp parallel for
     for (int i = subgrid_vol_cb * 3 * 4; i < subgrid_vol * 3 * 4; i++) {
         dest.A[i] = (a + mass) * src.A[i];
     }
@@ -114,12 +116,14 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     double *resv_x_f = new double[len_x_f * 6 * 2];
     double *send_x_b = new double[len_x_f * 6 * 2];
     if (N_sub[0] != 1) {
+#pragma omp parallel for
         for (int i = 0; i < len_x_f * 6 * 2; i++) {
             send_x_b[i] = 0;
         }
 
         int cont = 0;
 
+// #pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -160,12 +164,14 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     double *send_x_f = new double[len_x_b * 6 * 2];
 
     if (N_sub[0] != 1) {
+#pragma omp parallel for
         for (int i = 0; i < len_x_b * 6 * 2; i++) {
             send_x_f[i] = 0;
         }
 
         int cont = 0;
 
+// #pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -219,12 +225,14 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     double *resv_y_f = new double[len_y_f * 6 * 2];
     double *send_y_b = new double[len_y_f * 6 * 2];
     if (N_sub[1] != 1) {
+#pragma omp parallel for
         for (int i = 0; i < len_y_f * 6 * 2; i++) {
             send_y_b[i] = 0;
         }
 
         int cont = 0;
 
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -263,11 +271,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
 
     if (N_sub[1] != 1) {
 
+#pragma omp parallel for
         for (int i = 0; i < len_y_b * 6 * 2; i++) {
             send_y_f[i] = 0;
         }
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -315,12 +325,14 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     double *resv_z_f = new double[len_z_f * 6 * 2];
     double *send_z_b = new double[len_z_f * 6 * 2];
     if (N_sub[2] != 1) {
+#pragma omp parallel for
         for (int i = 0; i < len_z_f * 6 * 2; i++) {
             send_z_b[i] = 0;
         }
 
         int cont = 0;
 
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -359,11 +371,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     double *send_z_f = new double[len_z_b * 6 * 2];
     if (N_sub[2] != 1) {
 
+#pragma omp parallel for
         for (int i = 0; i < len_z_b * 6 * 2; i++) {
             send_z_f[i] = 0;
         }
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -411,12 +425,14 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     double *resv_t_f = new double[len_t_f * 6 * 2];
     double *send_t_b = new double[len_t_f * 6 * 2];
     if (N_sub[3] != 1) {
+#pragma omp parallel for
         for (int i = 0; i < len_t_f * 6 * 2; i++) {
             send_t_b[i] = 0;
         }
 
         int cont = 0;
 
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int z = 0; z < subgrid[2]; z++) {
@@ -455,11 +471,13 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     double *send_t_f = new double[len_t_b * 6 * 2];
     if (N_sub[3] != 1) {
 
+#pragma omp parallel for
         for (int i = 0; i < len_t_b * 6 * 2; i++) {
             send_t_f[i] = 0;
         }
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int z = 0; z < subgrid[2]; z++) {
@@ -505,6 +523,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     //////////////////////////////////////////////////////// no comunication
     /////////////////////////////////////////////////////////
 
+// #pragma omp parallel for collapse(2)
     for (int y = 0; y < subgrid[1]; y++) {
         for (int z = 0; z < subgrid[2]; z++) {
             for (int t = 0; t < subgrid[3]; t++) {
@@ -557,6 +576,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         }
     }
 
+// #pragma omp parallel for collapse(2)
     for (int y = 0; y < subgrid[1]; y++) {
         for (int z = 0; z < subgrid[2]; z++) {
             for (int t = 0; t < subgrid[3]; t++) {
@@ -611,6 +631,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     }
 
     int y_u = (N_sub[1] == 1) ? subgrid[1] : subgrid[1] - 1;
+// #pragma omp parallel for collapse(2)
     for (int x = 0; x < subgrid[0]; x++) {
         for (int y = 0; y < y_u; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
@@ -656,6 +677,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     }
 
     int y_d = (N_sub[1] == 1) ? 0 : 1;
+// #pragma omp parallel for collapse(2)
     for (int x = 0; x < subgrid[0]; x++) {
         for (int y = y_d; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
@@ -700,6 +722,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     }
 
     int z_u = (N_sub[2] == 1) ? subgrid[2] : subgrid[2] - 1;
+// #pragma omp parallel for collapse(2)
     for (int x = 0; x < subgrid[0]; x++) {
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < z_u; z++) {
@@ -744,6 +767,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     }
 
     int z_d = (N_sub[2] == 1) ? 0 : 1;
+// #pragma omp parallel for collapse(2)
     for (int x = 0; x < subgrid[0]; x++) {
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = z_d; z < subgrid[2]; z++) {
@@ -790,6 +814,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
 
     int t_u = (N_sub[3] == 1) ? subgrid[3] : subgrid[3] - 1;
 
+// #pragma omp parallel for collapse(2)
     for (int x = 0; x < subgrid[0]; x++) {
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
@@ -834,6 +859,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
     }
 
     int t_d = (N_sub[3] == 1) ? 0 : 1;
+// #pragma omp parallel for collapse(2)
     for (int x = 0; x < subgrid[0]; x++) {
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
@@ -887,6 +913,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         MPI_Wait(&reqr[8 * nodenum_x_f], &star[8 * nodenum_x_f]);
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -941,6 +968,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
 
         int cont = 0;
 
+// #pragma omp parallel for collapse(2)
         for (int y = 0; y < subgrid[1]; y++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -980,6 +1008,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         MPI_Wait(&reqr[8 * nodenum_y_f + 2], &star[8 * nodenum_y_f + 2]);
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -1030,6 +1059,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         MPI_Wait(&reqr[8 * nodenum_y_b + 3], &star[8 * nodenum_y_b + 3]);
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -1057,7 +1087,6 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         }
 
         MPI_Wait(&reqs[8 * rank + 3], &stas[8 * rank + 3]);
-
     }
 
     //    delete[] send_y_f;
@@ -1068,6 +1097,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         MPI_Wait(&reqr[8 * nodenum_z_f + 4], &star[8 * nodenum_z_f + 4]);
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -1118,6 +1148,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         MPI_Wait(&reqr[8 * nodenum_z_b + 5], &star[8 * nodenum_z_b + 5]);
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int t = 0; t < subgrid[3]; t++) {
@@ -1153,6 +1184,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         MPI_Wait(&reqr[8 * nodenum_t_f + 6], &star[8 * nodenum_t_f + 6]);
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int z = 0; z < subgrid[2]; z++) {
@@ -1191,7 +1223,6 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         }
 
         MPI_Wait(&reqs[8 * rank + 6], &stas[8 * rank + 6]);
-
     }
 
     if (N_sub[3] != 1) {
@@ -1199,6 +1230,7 @@ void Dslashoffd(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, c
         MPI_Wait(&reqr[8 * nodenum_t_b + 7], &star[8 * nodenum_t_b + 7]);
 
         int cont = 0;
+// #pragma omp parallel for collapse(2)
         for (int x = 0; x < subgrid[0]; x++) {
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int z = 0; z < subgrid[2]; z++) {

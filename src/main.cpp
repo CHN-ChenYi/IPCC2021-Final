@@ -6,6 +6,7 @@
 #include <mpi.h>
 #include <time.h>
 #include <complex>
+#include <omp.h>
 #include "load_gauge.h"
 #include "invert.h"
 #include "check.h"
@@ -86,6 +87,12 @@ int main(int argc, char **argv)
 
     // WALL TIME START;
     double start_t = MPI_Wtime();
+
+#pragma omp parallel
+    {
+        if (!omp_get_thread_num())
+            printf("omp_get_num_threads: %d\n", omp_get_num_threads());
+    }
 
     // make source
     lattice_fermion src(subgs, site_vec);

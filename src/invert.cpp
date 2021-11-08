@@ -37,6 +37,7 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
     complex<double> beta(0);
 
     Dslash(src, Mdb, U, mass, true);
+#pragma omp parallel for
     for (int i = 0; i < dest.size; i++) {
         dest.A[i] = 1.0 * rand() / RAND_MAX;
     }
@@ -51,16 +52,19 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
     Dslash(dest, tmp, U, mass, false);
     Dslash(tmp, r0, U, mass, true);
 
+#pragma omp parallel for
     for (int i = 0; i < Mdb.size; i++) {
         r0.A[i] = Mdb.A[i] - r0.A[i];
     }
 
     for (int f = 1; f < max; f++) {
         if (f == 1) {
+#pragma omp parallel for
             for (int i = 0; i < r0.size; i++)
                 p.A[i] = r0.A[i];
         } else {
             beta = vector_p(r0, r0) / vector_p(r1, r1);
+#pragma omp parallel for
             for (int i = 0; i < r0.size; i++)
                 p.A[i] = r0.A[i] + beta * p.A[i];
         }
@@ -70,10 +74,13 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
 
         aphi = vector_p(r0, r0) / vector_p(p, q);
 
+#pragma omp parallel for
         for (int i = 0; i < dest.size; i++)
             dest.A[i] = dest.A[i] + aphi * p.A[i];
+#pragma omp parallel for
         for (int i = 0; i < r1.size; i++)
             r1.A[i] = r0.A[i];
+#pragma omp parallel for
         for (int i = 0; i < r0.size; i++)
             r0.A[i] = r0.A[i] - aphi * q.A[i];
         double rsd2 = norm_2(r0);
