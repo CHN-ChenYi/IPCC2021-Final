@@ -36,7 +36,7 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
     complex<double> aphi(0);
     complex<double> beta(0);
 
-    Dslash(src, Mdb, U, mass, true);
+    DslashNew(src, Mdb, U, mass, true);
 #pragma omp parallel for
     for (int i = 0; i < dest.size; i++) {
         dest.A[i] = 1.0 * rand() / RAND_MAX;
@@ -49,8 +49,8 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
         cout << "|src|^2 = " << src_nr2 << " , |dest|^2 = " << dest_nr2 << endl;
     }
 #endif
-    Dslash(dest, tmp, U, mass, false);
-    Dslash(tmp, r0, U, mass, true);
+    DslashNew(dest, tmp, U, mass, false);
+    DslashNew(tmp, r0, U, mass, true);
 
 #pragma omp parallel for
     for (int i = 0; i < Mdb.size; i++) {
@@ -69,8 +69,8 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
                 p.A[i] = r0.A[i] + beta * p.A[i];
         }
 
-        Dslash(p, qq, U, mass, false);
-        Dslash(qq, q, U, mass, true);
+        DslashNew(p, qq, U, mass, false);
+        DslashNew(qq, q, U, mass, true);
 
         aphi = vector_p(r0, r0) / vector_p(p, q);
 
@@ -112,5 +112,20 @@ void Dslash(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const
     Dslashoffd(src, tmp, U, dagger, 0); // cb=0, EO
     dest = dest + tmp;
     Dslashoffd(src, tmp, U, dagger, 1);
+    dest = dest + tmp;
+}
+
+void DslashNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const double mass,
+               const bool dagger)
+{
+    dest.clean();
+    lattice_fermion tmp(src.subgs, src.site_vec);
+    DslashEENew(src, tmp, mass);
+    dest = dest + tmp;
+    DslashOONew(src, tmp, mass);
+    dest = dest + tmp;
+    DslashoffdNew(src, tmp, U, dagger, 0); // cb=0, EO
+    dest = dest + tmp;
+    DslashoffdNew(src, tmp, U, dagger, 1);
     dest = dest + tmp;
 }

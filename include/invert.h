@@ -10,6 +10,7 @@
 #include "lattice_fermion.h"
 #include "lattice_gauge.h"
 #include "dslash.h"
+#include "dslash_new.h"
 
 int CGinvert(std::complex<double> *src_p, std::complex<double> *dest_p,
              std::complex<double> *gauge[4], const double mass, const int max,
@@ -20,5 +21,8 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
 
 void Dslash(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const double mass,
             const bool dagger);
+
+void DslashNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const double mass,
+               const bool dagger);
 
 #endif //LATTICE_invert_H
