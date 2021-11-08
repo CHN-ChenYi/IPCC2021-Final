@@ -113,12 +113,16 @@ void DslashNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, co
 {
     dest.clean();
     lattice_fermion tmp(src.subgs, src.site_vec);
-    DslashEENew(src, tmp, mass);
-    dest = dest + tmp;
-    DslashOONew(src, tmp, mass);
-    dest = dest + tmp;
+    // DslashEENew(src, tmp, mass);
+    // dest = dest + tmp;
+    // DslashOONew(src, tmp, mass);
+    DslashEEOONew(src, tmp, mass);
+    // dest = dest + tmp;
+    dest += tmp;
     DslashoffdNew(src, tmp, U, dagger, 0); // cb=0, EO
-    dest = dest + tmp;
+    // dest = dest + tmp;
+    dest += tmp;
     DslashoffdNew(src, tmp, U, dagger, 1);
-    dest = dest + tmp;
+    // dest = dest + tmp;
+    dest += tmp;
 }

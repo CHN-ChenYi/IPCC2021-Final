@@ -8,30 +8,71 @@
 #include "operator.h"
 using namespace std;
 
-void DslashEENew(lattice_fermion &src, lattice_fermion &dest, const double mass)
+#include <immintrin.h>
+
+// void DslashEENew(lattice_fermion &src, lattice_fermion &dest, const double mass)
+// {
+
+//     dest.clean();
+//     const double a = 4.0;
+//     int subgrid_vol = (src.subgs[0] * src.subgs[1] * src.subgs[2] * src.subgs[3]);
+//     int subgrid_vol_cb = (subgrid_vol) >> 1;
+
+//     for (int i = 0; i < subgrid_vol_cb * 3 * 4; i++) {
+//         dest.A[i] = (a + mass) * src.A[i];
+//     }
+// }
+
+// void DslashOONew(lattice_fermion &src, lattice_fermion &dest, const double mass)
+// {
+
+//     dest.clean();
+//     const double a = 4.0;
+//     int subgrid_vol = (src.subgs[0] * src.subgs[1] * src.subgs[2] * src.subgs[3]);
+//     int subgrid_vol_cb = (subgrid_vol) >> 1;
+
+//     for (int i = subgrid_vol_cb * 3 * 4; i < subgrid_vol * 3 * 4; i++) {
+//         dest.A[i] = (a + mass) * src.A[i];
+//     }
+// }
+
+void DslashEEOONew(lattice_fermion &src, lattice_fermion &dest, const double mass)
 {
 
-    dest.clean();
+    // dest.clean();
     const double a = 4.0;
+
     int subgrid_vol = (src.subgs[0] * src.subgs[1] * src.subgs[2] * src.subgs[3]);
-    int subgrid_vol_cb = (subgrid_vol) >> 1;
+    // int subgrid_vol_cb = (subgrid_vol) >> 1;
 
-    for (int i = 0; i < subgrid_vol_cb * 3 * 4; i++) {
-        dest.A[i] = (a + mass) * src.A[i];
+    __m256d vec_factor = _mm256_set1_pd(a + mass);
+
+    // for (int i = 0; i < subgrid_vol_cb * 3 * 4; i += 12) {
+    for (int i = 0; i < subgrid_vol * 3 * 4; i += 12) {
+        __m256d vec1 = _mm256_load_pd((double *) &src.A[i]);
+        __m256d vec2 = _mm256_load_pd((double *) &src.A[i + 2]);
+        __m256d vec3 = _mm256_load_pd((double *) &src.A[i + 4]);
+        __m256d vec4 = _mm256_load_pd((double *) &src.A[i + 6]);
+        __m256d vec5 = _mm256_load_pd((double *) &src.A[i + 8]);
+        __m256d vec6 = _mm256_load_pd((double *) &src.A[i + 10]);
+        vec1 = _mm256_mul_pd(vec_factor, vec1);
+        vec2 = _mm256_mul_pd(vec_factor, vec2);
+        vec3 = _mm256_mul_pd(vec_factor, vec3);
+        vec4 = _mm256_mul_pd(vec_factor, vec4);
+        vec5 = _mm256_mul_pd(vec_factor, vec5);
+        vec6 = _mm256_mul_pd(vec_factor, vec6);
+        _mm256_stream_pd((double *) &dest.A[i], vec1);
+        _mm256_stream_pd((double *) &dest.A[i + 2], vec2);
+        _mm256_stream_pd((double *) &dest.A[i + 4], vec3);
+        _mm256_stream_pd((double *) &dest.A[i + 6], vec4);
+        _mm256_stream_pd((double *) &dest.A[i + 8], vec5);
+        _mm256_stream_pd((double *) &dest.A[i + 10], vec6);
+        // dest.A[i] = (a + mass) * src.A[i];
     }
-}
 
-void DslashOONew(lattice_fermion &src, lattice_fermion &dest, const double mass)
-{
-
-    dest.clean();
-    const double a = 4.0;
-    int subgrid_vol = (src.subgs[0] * src.subgs[1] * src.subgs[2] * src.subgs[3]);
-    int subgrid_vol_cb = (subgrid_vol) >> 1;
-
-    for (int i = subgrid_vol_cb * 3 * 4; i < subgrid_vol * 3 * 4; i++) {
-        dest.A[i] = (a + mass) * src.A[i];
-    }
+    // for (int i = subgrid_vol_cb * 3 * 4; i < subgrid_vol * 3 * 4; i += 12) {
+    //     dest.A[i] = (a + mass) * src.A[i];
+    // }
 }
 
 // cb = 0  EO  ;  cb = 1 OE

@@ -5,6 +5,7 @@
 
 #include "lattice_fermion.h"
 #include <iostream>
+#include <immintrin.h>
 using namespace std;
 
 //lattice_fermion::lattice_fermion(LatticeFermion &chroma_fermi) {
@@ -25,14 +26,16 @@ lattice_fermion::lattice_fermion(int *subgs1, int *site_vec1)
     subgs = subgs1;
     site_vec = site_vec1;
     size = subgs[0] * subgs[1] * subgs[2] * subgs[3] * 3 * 4;
-    A = new std::complex<double>[size]();
+    // A = new std::complex<double>[size]();
+    A = (std::complex<double> *) _mm_malloc(size * sizeof(double) * 2, 32);
     mem_flag = true;
 }
 
 lattice_fermion::~lattice_fermion()
 {
     if (mem_flag)
-        delete[] A;
+        _mm_free(A);
+    //delete[] A;
     A = NULL;
     subgs = NULL;
     site_vec = NULL;
@@ -59,6 +62,36 @@ lattice_fermion &lattice_fermion::operator+(const lattice_fermion &a)
         this->A[i] = this->A[i] + a.A[i];
     }
     return *this;
+}
+
+void lattice_fermion::operator+=(const lattice_fermion &a)
+{
+    for (int i = 0; i < size; i += 12) {
+        __m256d vec1 = _mm256_load_pd((double *) &A[i]);
+        __m256d vec2 = _mm256_load_pd((double *) &a.A[i]);
+        __m256d vec3 = _mm256_load_pd((double *) &A[i + 2]);
+        __m256d vec4 = _mm256_load_pd((double *) &a.A[i + 2]);
+        __m256d vec5 = _mm256_load_pd((double *) &A[i + 4]);
+        __m256d vec6 = _mm256_load_pd((double *) &a.A[i + 4]);
+        __m256d vec7 = _mm256_load_pd((double *) &A[i + 6]);
+        __m256d vec8 = _mm256_load_pd((double *) &a.A[i + 6]);
+        __m256d vec9 = _mm256_load_pd((double *) &A[i + 8]);
+        __m256d vec10 = _mm256_load_pd((double *) &a.A[i + 8]);
+        __m256d vec11 = _mm256_load_pd((double *) &A[i + 10]);
+        __m256d vec12 = _mm256_load_pd((double *) &a.A[i + 10]);
+        vec1 = _mm256_add_pd(vec1, vec2);
+        vec3 = _mm256_add_pd(vec3, vec4);
+        vec5 = _mm256_add_pd(vec5, vec6);
+        vec7 = _mm256_add_pd(vec7, vec8);
+        vec9 = _mm256_add_pd(vec9, vec10);
+        vec11 = _mm256_add_pd(vec11, vec12);
+        _mm256_store_pd((double *) &A[i], vec1);
+        _mm256_store_pd((double *) &A[i + 2], vec3);
+        _mm256_store_pd((double *) &A[i + 4], vec5);
+        _mm256_store_pd((double *) &A[i + 6], vec7);
+        _mm256_store_pd((double *) &A[i + 8], vec9);
+        _mm256_store_pd((double *) &A[i + 10], vec11);
+    }
 }
 
 /*

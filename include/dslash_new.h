@@ -13,8 +13,9 @@
 #include "operator.h"
 #include "operator_mpi.h"
 
-void DslashEENew(lattice_fermion &src, lattice_fermion &dest, const double mass);
-void DslashOONew(lattice_fermion &src, lattice_fermion &dest, const double mass);
+// void DslashEENew(lattice_fermion &src, lattice_fermion &dest, const double mass);
+// void DslashOONew(lattice_fermion &src, lattice_fermion &dest, const double mass);
+void DslashEEOONew(lattice_fermion &src, lattice_fermion &dest, const double mass);
 void DslashEONew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const bool dag);
 void DslashOENew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const bool dag);
 void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const bool dag,
