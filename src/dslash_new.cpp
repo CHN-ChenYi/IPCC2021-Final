@@ -34,7 +34,6 @@ void U33_P1(fast_complex *src, double *sender, double flag, int b)
     vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp1 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (0 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_loadu_pd((double *) (src + 3));
@@ -42,7 +41,6 @@ void U33_P1(fast_complex *src, double *sender, double flag, int b)
     vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp2 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (1 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
@@ -50,7 +48,6 @@ void U33_P1(fast_complex *src, double *sender, double flag, int b)
     vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // vec1 = complex_256_mul(vec1, vecA2);
 
     __m128d res1 = _mm256_extractf128_pd(vec1, 0);
     __m128d res2 = _mm256_extractf128_pd(vec1, 1);
@@ -76,14 +73,9 @@ void U33_P2(fast_complex *A, fast_complex *src, double *sender, double flag, int
     //         send_x_f[b * 2 + (1 * 3 + c1) * 2 + 1] += tmp.imag();
     //     }
     // }
-    // const __m256d flag_vec = _mm256_xor_pd(_mm256_set1_pd(flag), odd_vec);
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-        // __m256d vecA1 =
-        //     _mm256_xor_pd(_mm256_load2_m128d((double *) &A[c1 + 3], (double *) &A[c1]), even_vec);
-        // __m256d vecA2 = _mm256_xor_pd(
-        //     _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]), even_vec);
 
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
@@ -131,30 +123,23 @@ void U33_P3(fast_complex *src, double *sender, double flag, int b)
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     __m256d vec1 = _mm256_loadu_pd((double *) (src));
-    __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
-    // vec2 = _mm256_permute_pd(vec2, 0b0101);
+    __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));;
     vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp1 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (0 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_loadu_pd((double *) (src + 3));
     vec2 = _mm256_loadu_pd((double *) (src + 6));
-    // vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp2 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (1 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
     vec2 = _mm256_load2_m128d_lrv((double *) (src + 8), (double *) (src + 11));
-    // vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // vec1 = complex_256_mul(vec1, vecA2);
 
     __m128d res1 = _mm256_extractf128_pd(vec1, 0);
     __m128d res2 = _mm256_extractf128_pd(vec1, 1);
@@ -180,34 +165,26 @@ void U33_P4(fast_complex *A, fast_complex *src, double *sender, double flag, int
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-        // __m256d vecA1 =
-        //     _mm256_xor_pd(_mm256_load2_m128d((double *) &A[c1 + 3], (double *) &A[c1]), even_vec);
-        // __m256d vecA2 = _mm256_xor_pd(
-        //     _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]), even_vec);
 
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
         vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
         vec2 = _mm256_load2_m128d_lrv((double *) (src + 8), (double *) (src + 11));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
@@ -233,7 +210,6 @@ void U33_P5(fast_complex *src, double *sender, double flag, int b)
     //     send_z_b[b * 2 + (1 * 3 + c2) * 2 + 1] += tmp.imag();
     // }
 
-    // const __m256d flag_vec = _mm256_set1_pd(flag);
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     __m256d vec1 = _mm256_loadu_pd((double *) (src));
@@ -241,7 +217,6 @@ void U33_P5(fast_complex *src, double *sender, double flag, int b)
     vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp1 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (0 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_loadu_pd((double *) (src + 3));
@@ -249,7 +224,6 @@ void U33_P5(fast_complex *src, double *sender, double flag, int b)
     vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp2 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (1 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
@@ -257,7 +231,6 @@ void U33_P5(fast_complex *src, double *sender, double flag, int b)
     vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // vec1 = complex_256_mul(vec1, vecA2);
 
     __m128d res1 = _mm256_extractf128_pd(vec1, 0);
     __m128d res2 = _mm256_extractf128_pd(vec1, 1);
@@ -281,14 +254,9 @@ void U33_P6(fast_complex *A, fast_complex *src, double *sender, double flag, int
     //     }
     // }
 
-    // const __m256d flag_vec = _mm256_set1_pd(flag);
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-        // __m256d vecA1 =
-        //     _mm256_xor_pd(_mm256_load2_m128d((double *) &A[c1 + 3], (double *) &A[c1]), even_vec);
-        // __m256d vecA2 = _mm256_xor_pd(
-        //     _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]), even_vec);
 
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
@@ -336,30 +304,23 @@ void U33_P7(fast_complex *src, double *sender, double flag, int b)
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     __m256d vec1 = _mm256_loadu_pd((double *) (src));
     __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-    // vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp1 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (0 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_loadu_pd((double *) (src + 3));
     vec2 = _mm256_loadu_pd((double *) (src + 9));
-    // vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // __m256d tmp2 = complex_256_mul(vec1, vecA1);
     _mm256_storeu_pd(&sender[b * 2 + (1 * 3 + 0) * 2 + 0], vec1);
 
     vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
     vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-    // vec2 = _mm256_permute_pd(vec2, 0b0101);
     vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
-    // vec1 = complex_256_mul(vec1, vecA2);
 
     __m128d res1 = _mm256_extractf128_pd(vec1, 0);
     __m128d res2 = _mm256_extractf128_pd(vec1, 1);
@@ -384,34 +345,25 @@ void U33_P8(fast_complex *A, fast_complex *src, double *sender, double flag, int
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-        // __m256d vecA1 =
-        //     _mm256_xor_pd(_mm256_load2_m128d((double *) &A[c1 + 3], (double *) &A[c1]), even_vec);
-        // __m256d vecA2 = _mm256_xor_pd(
-        //     _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]), even_vec);
-
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
         vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
         vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
@@ -510,11 +462,6 @@ void U33_P10(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]) * even_vec;
-        // __m256d vecA2 =
-        //     _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]) * even_vec;
-
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
@@ -582,16 +529,6 @@ void U33_P11(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
 
     for (int c1 = 0; c1 < 3; c1++) {
 
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]) * even_vec;
-        // __m256d vecA2 =
-        //     _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]) * even_vec;
-
-        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
-        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
-
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
@@ -655,18 +592,8 @@ void U33_P12(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
 
     for (int c1 = 0; c1 < 3; c1++) {
 
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]) * even_vec;
-        // __m256d vecA2 =
-        //     _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]) * even_vec;
-
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
-
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
@@ -728,16 +655,6 @@ void U33_P13(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]) * even_vec;
-        // __m256d vecA2 =
-        //     _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]) * even_vec;
-
-        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
-        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
 
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
@@ -807,18 +724,8 @@ void U33_P14(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
 
     for (int c1 = 0; c1 < 3; c1++) {
 
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]) * even_vec;
-        // __m256d vecA2 =
-        //     _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]) * even_vec;
-
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
-
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
@@ -884,36 +791,23 @@ void U33_P15(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
 
     for (int c1 = 0; c1 < 3; c1++) {
 
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]) * even_vec;
-        // __m256d vecA2 =
-        //     _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]) * even_vec;
-
-        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
-        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
-
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
         vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
         vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
@@ -929,7 +823,6 @@ void U33_P15(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
                      res2 + _mm_load_pd((double *) &dest[1 * 3 + c1]));
 
         vec1 = _mm256_set_m128d(res2, res1);
-        // vec1 = _mm256_permute_pd(vec1, 0b0101);
         vec1 = _mm256_mul_pd(flag_vec, vec1);
         vec2 = _mm256_load2_m128d((double *) &dest[3 * 3 + c1], (double *) &dest[2 * 3 + c1]);
         vec1 = _mm256_sub_pd(vec2, vec1);
@@ -957,40 +850,26 @@ void U33_P16(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]) * even_vec;
-        // __m256d vecA2 =
-        //     _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]) * even_vec;
 
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
-
-        // __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
-
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
         vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
         vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
@@ -1032,40 +911,21 @@ void U33_P17(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     //     }
     // }
 
-    // const __m256d flag_vec = _mm256_set1_pd(flag);
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-
-        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
-        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
 
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2;
-        // __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
-        // vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
-        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
 
         __m128d res1 = _mm256_extractf128_pd(tmp1, 0) + _mm256_extractf128_pd(tmp1, 1) +
@@ -1101,7 +961,6 @@ void U33_P18(fast_complex *src, fast_complex *dest, double flag)
     //     destE[2 * 3 + c1] += flag * (-I * srcO[1 * 3 + c1]);
     // }
 
-    // const __m256d flag_vec = _mm256_set1_pd(flag);
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     __m256d tmp1 = _mm256_loadu_pd((double *) (src));
@@ -1152,39 +1011,20 @@ void U33_P19(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-
-        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
-        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
 
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2;
-        // __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
-        // vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
-        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
 
         __m128d res1 = _mm256_extractf128_pd(tmp1, 0) + _mm256_extractf128_pd(tmp1, 1) +
@@ -1198,7 +1038,6 @@ void U33_P19(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
                      res2 + _mm_load_pd((double *) &dest[1 * 3 + c1]));
 
         vec1 = _mm256_set_m128d(-res2, res1);
-        // vec1 = _mm256_permute_pd(vec1, 0b0101);
         vec1 = _mm256_mul_pd(flag_vec, vec1);
         vec2 = _mm256_load2_m128d((double *) &dest[2 * 3 + c1], (double *) &dest[3 * 3 + c1]);
         vec1 = _mm256_add_pd(vec2, vec1);
@@ -1221,7 +1060,6 @@ void U33_P20(fast_complex *src, fast_complex *dest, double flag)
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     __m256d tmp1 = _mm256_loadu_pd((double *) (src));
     __m256d vec2 = _mm256_loadu_pd((double *) (dest));
@@ -1243,13 +1081,10 @@ void U33_P20(fast_complex *src, fast_complex *dest, double flag)
     _mm_store_pd((double *) (dest + 2), res1);
     _mm_store_pd((double *) (dest + 5), res2);
 
-    // tmp1 = _mm256_permute_pd(tmp1, 0b0101);
     tmp1 = _mm256_mul_pd(flag_vec, tmp1);
     _mm256_storeu_pd((double *) (dest + 9), _mm256_loadu_pd((double *) (dest + 9)) - tmp1);
-    // tmp2 = _mm256_permute_pd(tmp2, 0b0101);
     tmp2 = _mm256_mul_pd(flag_vec, tmp2);
     _mm256_storeu_pd((double *) (dest + 6), _mm256_loadu_pd((double *) (dest + 6)) + tmp2);
-    // vec1 = _mm256_permute_pd(vec1, 0b0101);
     vec1 = _mm256_mul_pd(flag_vec, vec1);
     res1 = _mm256_extractf128_pd(vec1, 0);
     res2 = _mm256_extractf128_pd(vec1, 1);
@@ -1270,40 +1105,21 @@ void U33_P21(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     //     }
     // }
 
-    // const __m256d flag_vec = _mm256_set1_pd(flag);
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-
-        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
-        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
 
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2;
-        // __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
-        // vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
-        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
 
         __m128d res1 = _mm256_extractf128_pd(tmp1, 0) + _mm256_extractf128_pd(tmp1, 1) +
@@ -1339,7 +1155,6 @@ void U33_P22(fast_complex *src, fast_complex *dest, double flag)
     //     destE[3 * 3 + c1] += flag * (I * srcO[1 * 3 + c1]);
     // }
 
-    // const __m256d flag_vec = _mm256_set1_pd(flag);
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     __m256d tmp1 = _mm256_loadu_pd((double *) (src));
@@ -1390,39 +1205,20 @@ void U33_P23(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
-
-        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
-        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
-
-        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
-        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
 
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
         __m256d vec1 = _mm256_loadu_pd((double *) (src));
         __m256d vec2;
-        // __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
-        // vec2 = _mm256_loadu_pd((double *) (src + 9));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
-        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        // vec2 = _mm256_permute_pd(vec2, 0b0101);
-        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
-        // vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
 
         __m128d res1 = _mm256_extractf128_pd(tmp1, 0) + _mm256_extractf128_pd(tmp1, 1) +
@@ -1436,7 +1232,6 @@ void U33_P23(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
                      res2 + _mm_load_pd((double *) &dest[1 * 3 + c1]));
 
         vec1 = _mm256_set_m128d(res2, res1);
-        // vec1 = _mm256_permute_pd(vec1, 0b0101);
         vec1 = _mm256_mul_pd(flag_vec, vec1);
         vec2 = _mm256_load2_m128d((double *) &dest[3 * 3 + c1], (double *) &dest[2 * 3 + c1]);
         vec1 = _mm256_sub_pd(vec2, vec1);
@@ -1459,8 +1254,6 @@ void U33_P24(fast_complex *src, fast_complex *dest, double flag)
     // }
 
     const __m256d flag_vec = _mm256_set1_pd(flag);
-    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
-
     __m256d tmp1 = _mm256_loadu_pd((double *) (src));
     __m256d vec2 = _mm256_loadu_pd((double *) (dest));
     __m256d vec1 = _mm256_add_pd(tmp1, vec2);
@@ -1481,13 +1274,10 @@ void U33_P24(fast_complex *src, fast_complex *dest, double flag)
     _mm_store_pd((double *) (dest + 2), res1);
     _mm_store_pd((double *) (dest + 5), res2);
 
-    // tmp1 = _mm256_permute_pd(tmp1, 0b0101);
     tmp1 = _mm256_mul_pd(flag_vec, tmp1);
     _mm256_storeu_pd((double *) (dest + 6), _mm256_loadu_pd((double *) (dest + 6)) + tmp1);
-    // tmp2 = _mm256_permute_pd(tmp2, 0b0101);
     tmp2 = _mm256_mul_pd(flag_vec, tmp2);
     _mm256_storeu_pd((double *) (dest + 9), _mm256_loadu_pd((double *) (dest + 9)) + tmp2);
-    // vec1 = _mm256_permute_pd(vec1, 0b0101);
     vec1 = _mm256_mul_pd(flag_vec, vec1);
     res1 = _mm256_extractf128_pd(vec1, 0);
     res2 = _mm256_extractf128_pd(vec1, 1);
