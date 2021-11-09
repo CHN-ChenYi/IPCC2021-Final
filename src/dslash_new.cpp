@@ -401,29 +401,36 @@ void U33_P9(fast_complex *A, fast_complex *src, fast_complex *dest, double flag)
 
     const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
 
+    __m256d a_vec = _mm256_load_pd((double *) (src));
+    __m256d b_vec = _mm256_load_pd((double *) (src + 9));
+    __m256d c_vec = _mm256_loadu_pd((double *) (src + 3));
+    __m256d d_vec = _mm256_loadu_pd((double *) (src + 6));
+    __m256d e_vec = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+    __m256d f_vec = _mm256_load2_m128d((double *) (src + 8), (double *) (src + 11));
+
     for (int c1 = 0; c1 < 3; c1++) {
 
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
-        __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
-        vec2 = _mm256_permute_pd(vec2, 0b0101);
-        vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
+        __m256d vec1; //= _mm256_load_pd((double *) (src));
+        __m256d vec2; //= _mm256_loadu_pd((double *) (src + 9));
+        vec2 = _mm256_permute_pd(b_vec, 0b0101);
+        vec1 = _mm256_fmsub_pd(flag_vec, vec2, a_vec);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
-        vec1 = _mm256_loadu_pd((double *) (src + 3));
-        vec2 = _mm256_loadu_pd((double *) (src + 6));
-        vec2 = _mm256_permute_pd(vec2, 0b0101);
-        vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_loadu_pd((double *) (src + 3));
+        // vec2 = _mm256_load_pd((double *) (src + 6));
+        vec2 = _mm256_permute_pd(d_vec, 0b0101);
+        vec1 = _mm256_fmsub_pd(flag_vec, vec2, c_vec);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
-        vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
-        vec2 = _mm256_load2_m128d((double *) (src + 8), (double *) (src + 11));
-        vec2 = _mm256_permute_pd(vec2, 0b0101);
-        vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+        // vec2 = _mm256_load2_m128d((double *) (src + 8), (double *) (src + 11));
+        vec2 = _mm256_permute_pd(f_vec, 0b0101);
+        vec1 = _mm256_fmsub_pd(flag_vec, vec2, e_vec);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
 
@@ -471,7 +478,7 @@ void U33_P10(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
+        __m256d vec1 = _mm256_load_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
         vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
@@ -479,7 +486,7 @@ void U33_P10(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
-        vec2 = _mm256_loadu_pd((double *) (src + 6));
+        vec2 = _mm256_load_pd((double *) (src + 6));
         vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
@@ -538,14 +545,14 @@ void U33_P11(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
+        __m256d vec1 = _mm256_load_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
-        vec2 = _mm256_loadu_pd((double *) (src + 6));
+        vec2 = _mm256_load_pd((double *) (src + 6));
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
@@ -601,14 +608,14 @@ void U33_P12(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
+        __m256d vec1 = _mm256_load_pd((double *) (src));
         __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
         vec1 = _mm256_loadu_pd((double *) (src + 3));
-        vec2 = _mm256_loadu_pd((double *) (src + 6));
+        vec2 = _mm256_load_pd((double *) (src + 6));
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
@@ -665,8 +672,8 @@ void U33_P13(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
-        __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
+        __m256d vec1 = _mm256_load_pd((double *) (src));
+        __m256d vec2 = _mm256_load_pd((double *) (src + 6));
         vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
@@ -733,8 +740,8 @@ void U33_P14(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
-        __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
+        __m256d vec1 = _mm256_load_pd((double *) (src));
+        __m256d vec2 = _mm256_load_pd((double *) (src + 6));
         vec2 = _mm256_permute_pd(vec2, 0b0101);
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
@@ -800,8 +807,8 @@ void U33_P15(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
         __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
-        __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
+        __m256d vec1 = _mm256_load_pd((double *) (src));
+        __m256d vec2 = _mm256_load_pd((double *) (src + 6));
         vec1 = _mm256_fmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
@@ -862,8 +869,8 @@ void U33_P16(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
-        __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
+        __m256d vec1 = _mm256_load_pd((double *) (src));
+        __m256d vec2 = _mm256_load_pd((double *) (src + 6));
         vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
@@ -2189,7 +2196,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                          (subgrid[0] * subgrid[1] * subgrid[2] * b_t + subgrid[0] * subgrid[1] * z +
                           subgrid[0] * y + x + (1 - cb) * subgrid_vol_cb) *
                              9;
-
 
                     U33_P16((fast_complex *) AO, (fast_complex *) srcO, (fast_complex *) destE,
                             flag);
