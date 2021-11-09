@@ -48,16 +48,27 @@ double norm_2(const T &s)
 template <typename T>
 std::complex<double> vector_p(const T &r1, const T &r2)
 {
-    std::complex<double> s1(0.0, 0.0);
-    for (int i = 0; i < r1.size; i++) {
-        s1 += (conj(r1.A[i]) * r2.A[i]);
+    // std::complex<double> s1(0.0, 0.0);
+    // for (int i = 0; i < r1.size; i++) {
+    //     s1 += (conj(r1.A[i]) * r2.A[i]);
+    // }
+    __m256d s1 = _mm256_setzero_pd();
+    for (int i = 0; i < r1.size; i += 2) {
+        __m256d vec2 = _mm256_load_pd((double *) &r2.A[i]);
+        __m256d vec1 = _mm256_mul_pd(_mm256_load_pd((double *) &r1.A[i]), odd_vec);
+        s1 += complex_256_mul(vec1, vec2);
     }
-    double sum_r = s1.real(); //fix
-    double sum_i = s1.imag();
+    __m128d res1 = _mm256_extractf128_pd(s1, 0);
+    __m128d res2 = _mm256_extractf128_pd(s1, 1);
+    res1 = _mm_add_pd(res1, res2);
+    fast_complex sum_inter;
+    _mm_store_pd((double *) &sum_inter, res1);
+    // double sum_r = s1.real(); //fix
+    // double sum_i = s1.imag();
     double sumr;
     double sumi;
-    MPI_Reduce(&sum_r, &sumr, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(&sum_i, &sumi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&sum_inter.r, &sumr, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&sum_inter.i, &sumi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Bcast(&sumr, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&sumi, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Barrier(MPI_COMM_WORLD);

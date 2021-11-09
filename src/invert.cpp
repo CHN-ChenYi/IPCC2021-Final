@@ -9,6 +9,7 @@
 #include <math.h>
 #include <iostream>
 #include "fast_complex.hpp"
+#include <cstring>
 using namespace std;
 
 int CGinvert(complex<double> *src_p, complex<double> *dest_p, complex<double> *gauge[4],
@@ -137,7 +138,8 @@ void Dslash(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const
 void DslashNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, const double mass,
                const bool dagger)
 {
-    dest.clean();
+    // dest.clean();
+    memset(dest.A, 0, 2 * sizeof(double) * dest.size);
     lattice_fermion tmp(src.subgs, src.site_vec);
     // DslashEENew(src, tmp, mass);
     // dest = dest + tmp;

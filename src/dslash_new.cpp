@@ -9,6 +9,7 @@
 using namespace std;
 
 #include <immintrin.h>
+#include <cstring>
 #include "fast_complex.hpp"
 
 const __m256d half_vec = {0.5, 0.5, 0.5, 0.5};
@@ -1187,7 +1188,8 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     const int nodenum_t_b = get_nodenum(site_t_b, N_sub, 4);
     const int nodenum_t_f = get_nodenum(site_t_f, N_sub, 4);
 
-    dest.clean();
+    // dest.clean();
+    memset(dest.A, 0, 2 * sizeof(double) * dest.size);
     double flag = (dag == true) ? -1 : 1;
 
     int subgrid[4] = {src.subgs[0], src.subgs[1], src.subgs[2], src.subgs[3]};
