@@ -13,8 +13,8 @@ using namespace std;
 #include "fast_complex.hpp"
 
 const __m256d half_vec = {0.5, 0.5, 0.5, 0.5};
-// const __m256d odd_vec = _mm256_setr_pd(-1.0, 1.0, -1.0, 1.0);
-// const __m256d even_vec = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
+const __m256d odd_vec = _mm256_setr_pd(-1.0, 1.0, -1.0, 1.0);
+const __m256d even_vec = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
 
 void U33_P1(fast_complex *src, double *sender, double flag, int b)
 {
@@ -125,7 +125,8 @@ void U33_P3(fast_complex *src, double *sender, double flag, int b)
     const __m256d flag_vec = _mm256_set1_pd(flag);
 
     __m256d vec1 = _mm256_loadu_pd((double *) (src));
-    __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));;
+    __m256d vec2 = _mm256_loadu_pd((double *) (src + 9));
+    ;
     vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
     vec1 = _mm256_mul_pd(vec1, half_vec);
     _mm256_storeu_pd(&sender[b * 2 + (0 * 3 + 0) * 2 + 0], vec1);
@@ -344,27 +345,34 @@ void U33_P8(fast_complex *A, fast_complex *src, double *sender, double flag, int
     //     }
     // }
 
+    __m256d a_vec = _mm256_load_pd((double *) (src));
+    __m256d b_vec = _mm256_load_pd((double *) (src + 6));
+    __m256d c_vec = _mm256_loadu_pd((double *) (src + 3));
+    __m256d d_vec = _mm256_loadu_pd((double *) (src + 9));
+    __m256d e_vec = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+    __m256d f_vec = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
+
     const __m256d flag_vec = _mm256_set1_pd(flag);
 
     for (int c1 = 0; c1 < 3; c1++) {
         __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
         __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
 
-        __m256d vec1 = _mm256_loadu_pd((double *) (src));
-        __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
-        vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        __m256d vec1; // = _mm256_loadu_pd((double *) (src));
+        __m256d vec2; // = _mm256_loadu_pd((double *) (src + 6));
+        vec1 = _mm256_fnmsub_pd(flag_vec, b_vec, a_vec);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp1 = complex_256_mul(vec1, vecA1);
 
-        vec1 = _mm256_loadu_pd((double *) (src + 3));
-        vec2 = _mm256_loadu_pd((double *) (src + 9));
-        vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_loadu_pd((double *) (src + 3));
+        // vec2 = _mm256_loadu_pd((double *) (src + 9));
+        vec1 = _mm256_fnmsub_pd(flag_vec, d_vec, c_vec);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         __m256d tmp2 = complex_256_mul(vec1, vecA1);
 
-        vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
-        vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
-        vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
+        vec1 = _mm256_fnmsub_pd(flag_vec, f_vec, e_vec);
         vec1 = _mm256_mul_pd(vec1, half_vec);
         vec1 = complex_256_mul(vec1, vecA2);
 
