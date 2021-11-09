@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
+#include "fast_complex.hpp"
 using namespace std;
 
 int CGinvert(complex<double> *src_p, complex<double> *dest_p, complex<double> *gauge[4],
@@ -26,7 +27,7 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
     int myrank;
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
     lattice_fermion r0(src.subgs, src.site_vec);
-    lattice_fermion r1(src.subgs, src.site_vec);
+    // lattice_fermion r1(src.subgs, src.site_vec);
     lattice_fermion q(src.subgs, src.site_vec);
     lattice_fermion qq(src.subgs, src.site_vec);
     lattice_fermion p(src.subgs, src.site_vec);
@@ -55,27 +56,52 @@ int CGinvert(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U, cons
         r0.A[i] = Mdb.A[i] - r0.A[i];
     }
 
+    complex<double> r1;
+
     for (int f = 1; f < max; f++) {
         if (f == 1) {
             for (int i = 0; i < r0.size; i++)
                 p.A[i] = r0.A[i];
         } else {
-            beta = vector_p(r0, r0) / vector_p(r1, r1);
-            for (int i = 0; i < r0.size; i++)
-                p.A[i] = r0.A[i] + beta * p.A[i];
+            beta = vector_p(r0, r0) / r1; //vector_p(r1, r1);
+            __m256d beta_vec = _mm256_load2_m128d((double *) &beta, (double *) &beta);
+            // for (int i = 0; i < r0.size; i++)
+            //     p.A[i] = r0.A[i] + beta * p.A[i];
+            for (int i = 0; i < r0.size; i += 2) {
+                __m256d vecA = _mm256_load_pd((double *) &p.A[i]);
+                __m256d res = _mm256_load_pd((double *) &r0.A[i]);
+                res += complex_256_mul(beta_vec, vecA);
+                _mm256_store_pd((double *) &p.A[i], res);
+            }
         }
 
         DslashNew(p, qq, U, mass, false);
         DslashNew(qq, q, U, mass, true);
 
-        aphi = vector_p(r0, r0) / vector_p(p, q);
+        r1 = vector_p(r0, r0);
 
-        for (int i = 0; i < dest.size; i++)
-            dest.A[i] = dest.A[i] + aphi * p.A[i];
-        for (int i = 0; i < r1.size; i++)
-            r1.A[i] = r0.A[i];
-        for (int i = 0; i < r0.size; i++)
-            r0.A[i] = r0.A[i] - aphi * q.A[i];
+        aphi = r1 / vector_p(p, q);
+        __m256d aphi_vec = _mm256_load2_m128d((double *) &aphi, (double *) &aphi);
+
+        // for (int i = 0; i < dest.size; i++)
+        //     dest.A[i] = dest.A[i] + aphi * p.A[i];
+        for (int i = 0; i < dest.size; i += 2) {
+            __m256d vecA = _mm256_load_pd((double *) &p.A[i]);
+            __m256d res = _mm256_load_pd((double *) &dest.A[i]);
+            res += complex_256_mul(aphi_vec, vecA);
+            _mm256_store_pd((double *) &dest.A[i], res);
+            // dest.A[i] = dest.A[i] + aphi * p.A[i];
+        }
+        // for (int i = 0; i < r1.size; i++)
+        //     r1.A[i] = r0.A[i];
+        // for (int i = 0; i < r0.size; i++)
+        //     r0.A[i] = r0.A[i] - aphi * q.A[i];
+        for (int i = 0; i < r0.size; i += 2) {
+            __m256d vecA = _mm256_load_pd((double *) &q.A[i]);
+            __m256d res = _mm256_load_pd((double *) &r0.A[i]);
+            res -= complex_256_mul(aphi_vec, vecA);
+            _mm256_store_pd((double *) &r0.A[i], res);
+        }
         double rsd2 = norm_2(r0);
         double rsd = sqrt(rsd2);
         if (rsd < accuracy) {

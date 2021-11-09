@@ -101,6 +101,15 @@ inline fast_complex operator/(const fast_complex &a, const fast_complex &b)
 
 #include <immintrin.h>
 
+#define _mm256_load2_m128d(/* double const* */ hiaddr, /* double const* */ loaddr)                 \
+    _mm256_set_m128d(_mm_load_pd(hiaddr), _mm_load_pd(loaddr))
+
+#define _mm256_load2_m128d_hrv(/* double const* */ hiaddr, /* double const* */ loaddr)             \
+    _mm256_set_m128d(-_mm_load_pd(hiaddr), _mm_load_pd(loaddr))
+
+#define _mm256_load2_m128d_lrv(/* double const* */ hiaddr, /* double const* */ loaddr)             \
+    _mm256_set_m128d(_mm_load_pd(hiaddr), -_mm_load_pd(loaddr))
+
 inline __m256d complex_256_add(__m256d vec1, __m256d vec2)
 {
     return _mm256_add_pd(vec1, vec2);
