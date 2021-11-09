@@ -1216,9 +1216,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         int cont = 0;
 
-        for (int y = 0; y < subgrid[1]; y++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int y = 0; y < subgrid[1]; y++) {
 
                     if ((y + z + t + x_p) % 2 == cb) {
                         continue;
@@ -1264,9 +1264,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         int cont = 0;
 
-        for (int y = 0; y < subgrid[1]; y++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int y = 0; y < subgrid[1]; y++) {
                     if (((y + z + t + x_p) % 2) != cb) {
                         continue;
                     }
@@ -1325,9 +1325,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         int cont = 0;
 
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     int y = 0;
                     complex<double> tmp;
                     complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
@@ -1370,9 +1370,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         // }
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     complex<double> tmp;
 
                     int y = subgrid[1] - 1;
@@ -1426,9 +1426,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         int cont = 0;
 
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     int z = 0;
 
                     complex<double> tmp;
@@ -1471,9 +1471,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         // }
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     complex<double> tmp;
 
                     int z = subgrid[2] - 1;
@@ -1527,9 +1527,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         int cont = 0;
 
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int z = 0; z < subgrid[2]; z++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int z = 0; z < subgrid[2]; z++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     int t = 0;
 
                     complex<double> tmp;
@@ -1572,9 +1572,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         // }
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int z = 0; z < subgrid[2]; z++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int z = 0; z < subgrid[2]; z++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     complex<double> tmp;
 
                     int t = subgrid[3] - 1;
@@ -1620,9 +1620,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     //////////////////////////////////////////////////////// no comunication
     /////////////////////////////////////////////////////////
 
-    for (int y = 0; y < subgrid[1]; y++) {
+    for (int t = 0; t < subgrid[3]; t++) {
         for (int z = 0; z < subgrid[2]; z++) {
-            for (int t = 0; t < subgrid[3]; t++) {
+            for (int y = 0; y < subgrid[1]; y++) {
                 int x_u =
                     ((y + z + t + x_p) % 2 == cb || N_sub[0] == 1) ? subgrid[0] : subgrid[0] - 1;
 
@@ -1675,9 +1675,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         }
     }
 
-    for (int y = 0; y < subgrid[1]; y++) {
+    for (int t = 0; t < subgrid[3]; t++) {
         for (int z = 0; z < subgrid[2]; z++) {
-            for (int t = 0; t < subgrid[3]; t++) {
+            for (int y = 0; y < subgrid[1]; y++) {
                 int x_d = (((y + z + t + x_p) % 2) != cb || N_sub[0] == 1) ? 0 : 1;
 
                 for (int x = x_d; x < subgrid[0]; x++) {
@@ -1732,10 +1732,10 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     int y_u = (N_sub[1] == 1) ? subgrid[1] : subgrid[1] - 1;
-    for (int x = 0; x < subgrid[0]; x++) {
-        for (int y = 0; y < y_u; y++) {
-            for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+    for (int t = 0; t < subgrid[3]; t++) {
+        for (int z = 0; z < subgrid[2]; z++) {
+            for (int y = 0; y < y_u; y++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     complex<double> tmp;
                     complex<double> *destE;
@@ -1779,10 +1779,10 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     int y_d = (N_sub[1] == 1) ? 0 : 1;
-    for (int x = 0; x < subgrid[0]; x++) {
-        for (int y = y_d; y < subgrid[1]; y++) {
-            for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+    for (int t = 0; t < subgrid[3]; t++) {
+        for (int z = 0; z < subgrid[2]; z++) {
+            for (int y = y_d; y < subgrid[1]; y++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     complex<double> *destE;
                     complex<double> *AO;
                     complex<double> tmp;
@@ -1826,10 +1826,10 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     int z_u = (N_sub[2] == 1) ? subgrid[2] : subgrid[2] - 1;
-    for (int x = 0; x < subgrid[0]; x++) {
-        for (int y = 0; y < subgrid[1]; y++) {
-            for (int z = 0; z < z_u; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+    for (int t = 0; t < subgrid[3]; t++) {
+        for (int z = 0; z < z_u; z++) {
+            for (int y = 0; y < subgrid[1]; y++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     int f_z = (z + 1) % subgrid[2];
 
@@ -1873,10 +1873,10 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     int z_d = (N_sub[2] == 1) ? 0 : 1;
-    for (int x = 0; x < subgrid[0]; x++) {
-        for (int y = 0; y < subgrid[1]; y++) {
-            for (int z = z_d; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+    for (int t = 0; t < subgrid[3]; t++) {
+        for (int z = z_d; z < subgrid[2]; z++) {
+            for (int y = 0; y < subgrid[1]; y++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     complex<double> tmp;
                     complex<double> *destE;
@@ -1922,10 +1922,10 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
     int t_u = (N_sub[3] == 1) ? subgrid[3] : subgrid[3] - 1;
 
-    for (int x = 0; x < subgrid[0]; x++) {
-        for (int y = 0; y < subgrid[1]; y++) {
-            for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < t_u; t++) {
+    for (int t = 0; t < t_u; t++) {
+        for (int z = 0; z < subgrid[2]; z++) {
+            for (int y = 0; y < subgrid[1]; y++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     complex<double> tmp;
                     complex<double> *destE;
@@ -1969,10 +1969,10 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     int t_d = (N_sub[3] == 1) ? 0 : 1;
-    for (int x = 0; x < subgrid[0]; x++) {
-        for (int y = 0; y < subgrid[1]; y++) {
-            for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = t_d; t < subgrid[3]; t++) {
+    for (int t = t_d; t < subgrid[3]; t++) {
+        for (int z = 0; z < subgrid[2]; z++) {
+            for (int y = 0; y < subgrid[1]; y++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     complex<double> *destE;
                     complex<double> *AO;
@@ -2025,9 +2025,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         MPI_Wait(&reqr[8 * nodenum_x_f], &star[8 * nodenum_x_f]);
 
         int cont = 0;
-        for (int y = 0; y < subgrid[1]; y++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int y = 0; y < subgrid[1]; y++) {
                     if ((y + z + t + x_p) % 2 == cb) {
                         continue;
                     }
@@ -2080,9 +2080,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
         int cont = 0;
 
-        for (int y = 0; y < subgrid[1]; y++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int y = 0; y < subgrid[1]; y++) {
                     if (((y + z + t + x_p) % 2) != cb) {
                         continue;
                     }
@@ -2119,9 +2119,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         MPI_Wait(&reqr[8 * nodenum_y_f + 2], &star[8 * nodenum_y_f + 2]);
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     complex<double> tmp;
                     complex<double> *destE;
@@ -2169,9 +2169,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         MPI_Wait(&reqr[8 * nodenum_y_b + 3], &star[8 * nodenum_y_b + 3]);
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     complex<double> *srcO = (complex<double> *) (&resv_y_b[cont * 6 * 2]);
 
                     cont += 1;
@@ -2206,9 +2206,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         MPI_Wait(&reqr[8 * nodenum_z_f + 4], &star[8 * nodenum_z_f + 4]);
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     complex<double> tmp;
                     complex<double> *destE;
@@ -2256,9 +2256,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         MPI_Wait(&reqr[8 * nodenum_z_b + 5], &star[8 * nodenum_z_b + 5]);
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int t = 0; t < subgrid[3]; t++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int t = 0; t < subgrid[3]; t++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     complex<double> *srcO = (complex<double> *) (&resv_z_b[cont * 6 * 2]);
 
                     cont += 1;
@@ -2291,9 +2291,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         MPI_Wait(&reqr[8 * nodenum_t_f + 6], &star[8 * nodenum_t_f + 6]);
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int z = 0; z < subgrid[2]; z++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int z = 0; z < subgrid[2]; z++) {
+                for (int x = 0; x < subgrid[0]; x++) {
 
                     complex<double> tmp;
                     complex<double> *destE;
@@ -2336,9 +2336,9 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
         MPI_Wait(&reqr[8 * nodenum_t_b + 7], &star[8 * nodenum_t_b + 7]);
 
         int cont = 0;
-        for (int x = 0; x < subgrid[0]; x++) {
+        for (int z = 0; z < subgrid[2]; z++) {
             for (int y = 0; y < subgrid[1]; y++) {
-                for (int z = 0; z < subgrid[2]; z++) {
+                for (int x = 0; x < subgrid[0]; x++) {
                     complex<double> *srcO = (complex<double> *) (&resv_t_b[cont * 6 * 2]);
 
                     cont += 1;
