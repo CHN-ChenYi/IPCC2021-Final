@@ -13,8 +13,6 @@ using namespace std;
 #include "fast_complex.hpp"
 
 const __m256d half_vec = {0.5, 0.5, 0.5, 0.5};
-const __m256d odd_vec = _mm256_setr_pd(-1.0, 1.0, -1.0, 1.0);
-const __m256d even_vec = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
 
 void U33_P1(fast_complex *src, double *sender, double flag, int b)
 {
