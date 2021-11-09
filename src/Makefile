@@ -1,5 +1,5 @@
 CC       = mpicc
-CXX      = mpicxx
+CXX      = mpiicpc
 
 CXX_FLAGS = -fPIC -I../include -std=c++11 -Ofast -ffast-math -march=core-avx2 -fomit-frame-pointer
 #CXX_FLAGS = -fPIC -I../include -DVERBOSE_SIMPLE
@@ -26,8 +26,10 @@ fmt:
 	@#cd .. && git ls-files -- '*.cpp' '*.h' | xargs clang-format -i -style=file
 	find .. -name "*.cpp" -or -name "*.h" | xargs clang-format -i -style=file
 
-run: all
+run:
 	# mpirun -n 4 ./main  0.005  UNIT  24 24 24 96   12 12 24 48
+	sh setenv.sh
+	make -B
 	sbatch sub.sh
 	squeue
 
