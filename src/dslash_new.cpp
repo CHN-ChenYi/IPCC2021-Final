@@ -1092,6 +1092,409 @@ void U33_P17(fast_complex *A, fast_complex *src, fast_complex *dest, double flag
     }
 }
 
+void U33_P18(fast_complex *src, fast_complex *dest, double flag)
+{
+    // for (int c1 = 0; c1 < 3; c1++) {
+    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+    //     destE[3 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
+    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+    //     destE[2 * 3 + c1] += flag * (-I * srcO[1 * 3 + c1]);
+    // }
+
+    // const __m256d flag_vec = _mm256_set1_pd(flag);
+    const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
+
+    __m256d tmp1 = _mm256_loadu_pd((double *) (src));
+    __m256d vec2 = _mm256_loadu_pd((double *) (dest));
+    __m256d vec1 = _mm256_add_pd(tmp1, vec2);
+    _mm256_storeu_pd((double *) (dest), vec1);
+
+    __m256d tmp2 = _mm256_loadu_pd((double *) (src + 3));
+    vec2 = _mm256_loadu_pd((double *) (dest + 3));
+    vec1 = _mm256_add_pd(tmp2, vec2);
+    _mm256_storeu_pd((double *) (dest + 3), vec1);
+
+    vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+    vec2 = _mm256_load2_m128d((double *) (dest + 5), (double *) (dest + 2));
+    vec2 = _mm256_add_pd(vec1, vec2);
+
+    __m128d res1 = _mm256_extractf128_pd(vec2, 0);
+    __m128d res2 = _mm256_extractf128_pd(vec2, 1);
+
+    _mm_store_pd((double *) (dest + 2), res1);
+    _mm_store_pd((double *) (dest + 5), res2);
+
+    tmp1 = _mm256_permute_pd(tmp1, 0b0101);
+    tmp1 = _mm256_mul_pd(flag_vec, tmp1);
+    _mm256_storeu_pd((double *) (dest + 9), _mm256_loadu_pd((double *) (dest + 9)) - tmp1);
+    tmp2 = _mm256_permute_pd(tmp2, 0b0101);
+    tmp2 = _mm256_mul_pd(flag_vec, tmp2);
+    _mm256_storeu_pd((double *) (dest + 6), _mm256_loadu_pd((double *) (dest + 6)) - tmp2);
+    vec1 = _mm256_permute_pd(vec1, 0b0101);
+    vec1 = _mm256_mul_pd(flag_vec, vec1);
+    res1 = _mm256_extractf128_pd(vec1, 0);
+    res2 = _mm256_extractf128_pd(vec1, 1);
+    _mm_store_pd((double *) (dest + 11), _mm_load_pd((double *) (dest + 11)) - res1);
+    _mm_store_pd((double *) (dest + 8), _mm_load_pd((double *) (dest + 8)) - res2);
+}
+
+void U33_P19(fast_complex *A, fast_complex *src, fast_complex *dest, double flag)
+{
+    // for (int c1 = 0; c1 < 3; c1++) {
+    //     for (int c2 = 0; c2 < 3; c2++) {
+    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
+    //         destE[0 * 3 + c1] += tmp;
+    //         destE[3 * 3 + c1] += flag * (tmp);
+    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
+    //         destE[1 * 3 + c1] += tmp;
+    //         destE[2 * 3 + c1] -= flag * (tmp);
+    //     }
+    // }
+
+    const __m256d flag_vec = _mm256_set1_pd(flag);
+    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
+
+    for (int c1 = 0; c1 < 3; c1++) {
+
+        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
+        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
+
+        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
+        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
+
+        __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
+        __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
+
+        __m256d vec1 = _mm256_loadu_pd((double *) (src));
+        __m256d vec2;
+        // __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        __m256d tmp1 = complex_256_mul(vec1, vecA1);
+
+        vec1 = _mm256_loadu_pd((double *) (src + 3));
+        // vec2 = _mm256_loadu_pd((double *) (src + 9));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        __m256d tmp2 = complex_256_mul(vec1, vecA1);
+
+        vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        vec1 = complex_256_mul(vec1, vecA2);
+
+        __m128d res1 = _mm256_extractf128_pd(tmp1, 0) + _mm256_extractf128_pd(tmp1, 1) +
+                       _mm256_extractf128_pd(vec1, 0);
+        __m128d res2 = _mm256_extractf128_pd(tmp2, 0) + _mm256_extractf128_pd(tmp2, 1) +
+                       _mm256_extractf128_pd(vec1, 1);
+
+        _mm_store_pd((double *) &dest[0 * 3 + c1],
+                     res1 + _mm_load_pd((double *) &dest[0 * 3 + c1]));
+        _mm_store_pd((double *) &dest[1 * 3 + c1],
+                     res2 + _mm_load_pd((double *) &dest[1 * 3 + c1]));
+
+        vec1 = _mm256_set_m128d(-res2, res1);
+        // vec1 = _mm256_permute_pd(vec1, 0b0101);
+        vec1 = _mm256_mul_pd(flag_vec, vec1);
+        vec2 = _mm256_load2_m128d((double *) &dest[2 * 3 + c1], (double *) &dest[3 * 3 + c1]);
+        vec1 = _mm256_add_pd(vec2, vec1);
+
+        res1 = _mm256_extractf128_pd(vec1, 0);
+        res2 = _mm256_extractf128_pd(vec1, 1);
+
+        _mm_store_pd((double *) &dest[3 * 3 + c1], res1);
+        _mm_store_pd((double *) &dest[2 * 3 + c1], res2);
+    }
+}
+
+void U33_P20(fast_complex *src, fast_complex *dest, double flag)
+{
+    // for (int c1 = 0; c1 < 3; c1++) {
+    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+    //     destE[3 * 3 + c1] -= flag * srcO[0 * 3 + c1];
+    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+    //     destE[2 * 3 + c1] += flag * srcO[1 * 3 + c1];
+    // }
+
+    const __m256d flag_vec = _mm256_set1_pd(flag);
+    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
+
+    __m256d tmp1 = _mm256_loadu_pd((double *) (src));
+    __m256d vec2 = _mm256_loadu_pd((double *) (dest));
+    __m256d vec1 = _mm256_add_pd(tmp1, vec2);
+    _mm256_storeu_pd((double *) (dest), vec1);
+
+    __m256d tmp2 = _mm256_loadu_pd((double *) (src + 3));
+    vec2 = _mm256_loadu_pd((double *) (dest + 3));
+    vec1 = _mm256_add_pd(tmp2, vec2);
+    _mm256_storeu_pd((double *) (dest + 3), vec1);
+
+    vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+    vec2 = _mm256_load2_m128d((double *) (dest + 5), (double *) (dest + 2));
+    vec2 = _mm256_add_pd(vec1, vec2);
+
+    __m128d res1 = _mm256_extractf128_pd(vec2, 0);
+    __m128d res2 = _mm256_extractf128_pd(vec2, 1);
+
+    _mm_store_pd((double *) (dest + 2), res1);
+    _mm_store_pd((double *) (dest + 5), res2);
+
+    // tmp1 = _mm256_permute_pd(tmp1, 0b0101);
+    tmp1 = _mm256_mul_pd(flag_vec, tmp1);
+    _mm256_storeu_pd((double *) (dest + 9), _mm256_loadu_pd((double *) (dest + 9)) - tmp1);
+    // tmp2 = _mm256_permute_pd(tmp2, 0b0101);
+    tmp2 = _mm256_mul_pd(flag_vec, tmp2);
+    _mm256_storeu_pd((double *) (dest + 6), _mm256_loadu_pd((double *) (dest + 6)) + tmp2);
+    // vec1 = _mm256_permute_pd(vec1, 0b0101);
+    vec1 = _mm256_mul_pd(flag_vec, vec1);
+    res1 = _mm256_extractf128_pd(vec1, 0);
+    res2 = _mm256_extractf128_pd(vec1, 1);
+    _mm_store_pd((double *) (dest + 11), _mm_load_pd((double *) (dest + 11)) - res1);
+    _mm_store_pd((double *) (dest + 8), _mm_load_pd((double *) (dest + 8)) + res2);
+}
+
+void U33_P21(fast_complex *A, fast_complex *src, fast_complex *dest, double flag)
+{
+    // for (int c1 = 0; c1 < 3; c1++) {
+    //     for (int c2 = 0; c2 < 3; c2++) {
+    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
+    //         destE[0 * 3 + c1] += tmp;
+    //         destE[2 * 3 + c1] += flag * (I * tmp);
+    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
+    //         destE[1 * 3 + c1] += tmp;
+    //         destE[3 * 3 + c1] += flag * (-I * tmp);
+    //     }
+    // }
+
+    // const __m256d flag_vec = _mm256_set1_pd(flag);
+    const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
+
+    for (int c1 = 0; c1 < 3; c1++) {
+
+        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
+        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
+
+        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
+        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
+
+        __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
+        __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
+
+        __m256d vec1 = _mm256_loadu_pd((double *) (src));
+        __m256d vec2;
+        // __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        __m256d tmp1 = complex_256_mul(vec1, vecA1);
+
+        vec1 = _mm256_loadu_pd((double *) (src + 3));
+        // vec2 = _mm256_loadu_pd((double *) (src + 9));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        __m256d tmp2 = complex_256_mul(vec1, vecA1);
+
+        vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        vec1 = complex_256_mul(vec1, vecA2);
+
+        __m128d res1 = _mm256_extractf128_pd(tmp1, 0) + _mm256_extractf128_pd(tmp1, 1) +
+                       _mm256_extractf128_pd(vec1, 0);
+        __m128d res2 = _mm256_extractf128_pd(tmp2, 0) + _mm256_extractf128_pd(tmp2, 1) +
+                       _mm256_extractf128_pd(vec1, 1);
+
+        _mm_store_pd((double *) &dest[0 * 3 + c1],
+                     res1 + _mm_load_pd((double *) &dest[0 * 3 + c1]));
+        _mm_store_pd((double *) &dest[1 * 3 + c1],
+                     res2 + _mm_load_pd((double *) &dest[1 * 3 + c1]));
+
+        vec1 = _mm256_set_m128d(-res2, res1);
+        vec1 = _mm256_permute_pd(vec1, 0b0101);
+        vec1 = _mm256_mul_pd(flag_vec, vec1);
+        vec2 = _mm256_load2_m128d((double *) &dest[3 * 3 + c1], (double *) &dest[2 * 3 + c1]);
+        vec1 = _mm256_add_pd(vec2, vec1);
+
+        res1 = _mm256_extractf128_pd(vec1, 0);
+        res2 = _mm256_extractf128_pd(vec1, 1);
+
+        _mm_store_pd((double *) &dest[2 * 3 + c1], res1);
+        _mm_store_pd((double *) &dest[3 * 3 + c1], res2);
+    }
+}
+
+void U33_P22(fast_complex *src, fast_complex *dest, double flag)
+{
+    // for (int c1 = 0; c1 < 3; c1++) {
+    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+    //     destE[2 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
+    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+    //     destE[3 * 3 + c1] += flag * (I * srcO[1 * 3 + c1]);
+    // }
+
+    // const __m256d flag_vec = _mm256_set1_pd(flag);
+    const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
+
+    __m256d tmp1 = _mm256_loadu_pd((double *) (src));
+    __m256d vec2 = _mm256_loadu_pd((double *) (dest));
+    __m256d vec1 = _mm256_add_pd(tmp1, vec2);
+    _mm256_storeu_pd((double *) (dest), vec1);
+
+    __m256d tmp2 = _mm256_loadu_pd((double *) (src + 3));
+    vec2 = _mm256_loadu_pd((double *) (dest + 3));
+    vec1 = _mm256_add_pd(tmp2, vec2);
+    _mm256_storeu_pd((double *) (dest + 3), vec1);
+
+    vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+    vec2 = _mm256_load2_m128d((double *) (dest + 5), (double *) (dest + 2));
+    vec2 = _mm256_add_pd(vec1, vec2);
+
+    __m128d res1 = _mm256_extractf128_pd(vec2, 0);
+    __m128d res2 = _mm256_extractf128_pd(vec2, 1);
+
+    _mm_store_pd((double *) (dest + 2), res1);
+    _mm_store_pd((double *) (dest + 5), res2);
+
+    tmp1 = _mm256_permute_pd(tmp1, 0b0101);
+    tmp1 = _mm256_mul_pd(flag_vec, tmp1);
+    _mm256_storeu_pd((double *) (dest + 6), _mm256_loadu_pd((double *) (dest + 6)) - tmp1);
+    tmp2 = _mm256_permute_pd(tmp2, 0b0101);
+    tmp2 = _mm256_mul_pd(flag_vec, tmp2);
+    _mm256_storeu_pd((double *) (dest + 9), _mm256_loadu_pd((double *) (dest + 9)) + tmp2);
+    vec1 = _mm256_permute_pd(vec1, 0b0101);
+    vec1 = _mm256_mul_pd(flag_vec, vec1);
+    res1 = _mm256_extractf128_pd(vec1, 0);
+    res2 = _mm256_extractf128_pd(vec1, 1);
+    _mm_store_pd((double *) (dest + 8), _mm_load_pd((double *) (dest + 8)) - res1);
+    _mm_store_pd((double *) (dest + 11), _mm_load_pd((double *) (dest + 11)) + res2);
+}
+
+void U33_P23(fast_complex *A, fast_complex *src, fast_complex *dest, double flag)
+{
+    // for (int c1 = 0; c1 < 3; c1++) {
+    //     for (int c2 = 0; c2 < 3; c2++) {
+    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
+    //         destE[0 * 3 + c1] += tmp;
+    //         destE[2 * 3 + c1] -= flag * (tmp);
+    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
+    //         destE[1 * 3 + c1] += tmp;
+    //         destE[3 * 3 + c1] -= flag * (tmp);
+    //     }
+    // }
+
+    const __m256d flag_vec = _mm256_set1_pd(flag);
+    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
+
+    for (int c1 = 0; c1 < 3; c1++) {
+
+        // __m256d vecA1 = _mm256_setr_pd(A[c1].r, -A[c1].i, A[c1 + 3].r, -A[c1 + 3].i);
+        // __m256d vecA2 = _mm256_setr_pd(A[c1 + 6].r, -A[c1 + 6].i, A[c1 + 6].r, -A[c1 + 6].i);
+
+        // __m256d vecA1 = _mm256_load2_m128d((double *) &A[c1], (double *) &A[c1 + 3]);
+        // __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 + 6], (double *) &A[c1 + 6]);
+
+        __m256d vecA1 = _mm256_loadu_pd((double *) &A[c1 * 3]);
+        __m256d vecA2 = _mm256_load2_m128d((double *) &A[c1 * 3 + 2], (double *) &A[c1 * 3 + 2]);
+
+        __m256d vec1 = _mm256_loadu_pd((double *) (src));
+        __m256d vec2;
+        // __m256d vec2 = _mm256_loadu_pd((double *) (src + 6));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        __m256d tmp1 = complex_256_mul(vec1, vecA1);
+
+        vec1 = _mm256_loadu_pd((double *) (src + 3));
+        // vec2 = _mm256_loadu_pd((double *) (src + 9));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        __m256d tmp2 = complex_256_mul(vec1, vecA1);
+
+        vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+        // vec2 = _mm256_load2_m128d((double *) (src + 11), (double *) (src + 8));
+        // vec2 = _mm256_permute_pd(vec2, 0b0101);
+        // vec1 = _mm256_fnmsub_pd(flag_vec, vec2, vec1);
+        // vec1 = _mm256_mul_pd(vec1, half_vec);
+        vec1 = complex_256_mul(vec1, vecA2);
+
+        __m128d res1 = _mm256_extractf128_pd(tmp1, 0) + _mm256_extractf128_pd(tmp1, 1) +
+                       _mm256_extractf128_pd(vec1, 0);
+        __m128d res2 = _mm256_extractf128_pd(tmp2, 0) + _mm256_extractf128_pd(tmp2, 1) +
+                       _mm256_extractf128_pd(vec1, 1);
+
+        _mm_store_pd((double *) &dest[0 * 3 + c1],
+                     res1 + _mm_load_pd((double *) &dest[0 * 3 + c1]));
+        _mm_store_pd((double *) &dest[1 * 3 + c1],
+                     res2 + _mm_load_pd((double *) &dest[1 * 3 + c1]));
+
+        vec1 = _mm256_set_m128d(res2, res1);
+        // vec1 = _mm256_permute_pd(vec1, 0b0101);
+        vec1 = _mm256_mul_pd(flag_vec, vec1);
+        vec2 = _mm256_load2_m128d((double *) &dest[3 * 3 + c1], (double *) &dest[2 * 3 + c1]);
+        vec1 = _mm256_sub_pd(vec2, vec1);
+
+        res1 = _mm256_extractf128_pd(vec1, 0);
+        res2 = _mm256_extractf128_pd(vec1, 1);
+
+        _mm_store_pd((double *) &dest[2 * 3 + c1], res1);
+        _mm_store_pd((double *) &dest[3 * 3 + c1], res2);
+    }
+}
+
+void U33_P24(fast_complex *src, fast_complex *dest, double flag)
+{
+    // for (int c1 = 0; c1 < 3; c1++) {
+    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+    //     destE[2 * 3 + c1] += flag * (srcO[0 * 3 + c1]);
+    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+    //     destE[3 * 3 + c1] += flag * (srcO[1 * 3 + c1]);
+    // }
+
+    const __m256d flag_vec = _mm256_set1_pd(flag);
+    // const __m256d flag_vec = _mm256_setr_pd(-flag, flag, -flag, flag);
+
+    __m256d tmp1 = _mm256_loadu_pd((double *) (src));
+    __m256d vec2 = _mm256_loadu_pd((double *) (dest));
+    __m256d vec1 = _mm256_add_pd(tmp1, vec2);
+    _mm256_storeu_pd((double *) (dest), vec1);
+
+    __m256d tmp2 = _mm256_loadu_pd((double *) (src + 3));
+    vec2 = _mm256_loadu_pd((double *) (dest + 3));
+    vec1 = _mm256_add_pd(tmp2, vec2);
+    _mm256_storeu_pd((double *) (dest + 3), vec1);
+
+    vec1 = _mm256_load2_m128d((double *) (src + 5), (double *) (src + 2));
+    vec2 = _mm256_load2_m128d((double *) (dest + 5), (double *) (dest + 2));
+    vec2 = _mm256_add_pd(vec1, vec2);
+
+    __m128d res1 = _mm256_extractf128_pd(vec2, 0);
+    __m128d res2 = _mm256_extractf128_pd(vec2, 1);
+
+    _mm_store_pd((double *) (dest + 2), res1);
+    _mm_store_pd((double *) (dest + 5), res2);
+
+    // tmp1 = _mm256_permute_pd(tmp1, 0b0101);
+    tmp1 = _mm256_mul_pd(flag_vec, tmp1);
+    _mm256_storeu_pd((double *) (dest + 6), _mm256_loadu_pd((double *) (dest + 6)) + tmp1);
+    // tmp2 = _mm256_permute_pd(tmp2, 0b0101);
+    tmp2 = _mm256_mul_pd(flag_vec, tmp2);
+    _mm256_storeu_pd((double *) (dest + 9), _mm256_loadu_pd((double *) (dest + 9)) + tmp2);
+    // vec1 = _mm256_permute_pd(vec1, 0b0101);
+    vec1 = _mm256_mul_pd(flag_vec, vec1);
+    res1 = _mm256_extractf128_pd(vec1, 0);
+    res2 = _mm256_extractf128_pd(vec1, 1);
+    _mm_store_pd((double *) (dest + 8), _mm_load_pd((double *) (dest + 8)) + res1);
+    _mm_store_pd((double *) (dest + 11), _mm_load_pd((double *) (dest + 11)) + res2);
+}
+
 void DslashEEOONew(lattice_fermion &src, lattice_fermion &dest, const double mass)
 {
 
@@ -2099,12 +2502,13 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                        subgrid[0] * y + x + cb * subgrid_vol_cb) *
                                                           12;
 
-                    for (int c1 = 0; c1 < 3; c1++) {
-                        destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                        destE[3 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
-                        destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                        destE[2 * 3 + c1] += flag * (-I * srcO[1 * 3 + c1]);
-                    }
+                    U33_P18((fast_complex *) srcO, (fast_complex *) destE, flag);
+                    // for (int c1 = 0; c1 < 3; c1++) {
+                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+                    //     destE[3 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
+                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+                    //     destE[2 * 3 + c1] += flag * (-I * srcO[1 * 3 + c1]);
+                    // }
                 }
             }
         }
@@ -2145,16 +2549,18 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                           subgrid[0] * y + x + cb * subgrid_vol_cb) *
                              9;
 
-                    for (int c1 = 0; c1 < 3; c1++) {
-                        for (int c2 = 0; c2 < 3; c2++) {
-                            tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
-                            destE[0 * 3 + c1] += tmp;
-                            destE[3 * 3 + c1] += flag * (tmp);
-                            tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
-                            destE[1 * 3 + c1] += tmp;
-                            destE[2 * 3 + c1] -= flag * (tmp);
-                        }
-                    }
+                    U33_P19((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
+                            flag);
+                    // for (int c1 = 0; c1 < 3; c1++) {
+                    //     for (int c2 = 0; c2 < 3; c2++) {
+                    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
+                    //         destE[0 * 3 + c1] += tmp;
+                    //         destE[3 * 3 + c1] += flag * (tmp);
+                    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
+                    //         destE[1 * 3 + c1] += tmp;
+                    //         destE[2 * 3 + c1] -= flag * (tmp);
+                    //     }
+                    // }
                 }
             }
         }
@@ -2184,15 +2590,13 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                        subgrid[0] * y + x + cb * subgrid_vol_cb) *
                                                           12;
 
-                    for (int c1 = 0; c1 < 3; c1++) {
-                        destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                        destE[3 * 3 + c1] -= flag * srcO[0 * 3 + c1];
-                        destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                        destE[2 * 3 + c1] += flag * srcO[1 * 3 + c1];
-                    }
-                    //                    for (int i = 0; i < 12; i++) {
-                    //                        destE[i] += srcO[i];
-                    //                    }
+                    U33_P20((fast_complex *) srcO, (fast_complex *) destE, flag);
+                    // for (int c1 = 0; c1 < 3; c1++) {
+                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+                    //     destE[3 * 3 + c1] -= flag * srcO[0 * 3 + c1];
+                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+                    //     destE[2 * 3 + c1] += flag * srcO[1 * 3 + c1];
+                    // }
                 }
             }
         }
@@ -2232,16 +2636,19 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                           subgrid[0] * y + x + cb * subgrid_vol_cb) *
                              9;
 
-                    for (int c1 = 0; c1 < 3; c1++) {
-                        for (int c2 = 0; c2 < 3; c2++) {
-                            tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
-                            destE[0 * 3 + c1] += tmp;
-                            destE[2 * 3 + c1] += flag * (I * tmp);
-                            tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
-                            destE[1 * 3 + c1] += tmp;
-                            destE[3 * 3 + c1] += flag * (-I * tmp);
-                        }
-                    }
+                    U33_P21((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
+                            flag);
+
+                    // for (int c1 = 0; c1 < 3; c1++) {
+                    //     for (int c2 = 0; c2 < 3; c2++) {
+                    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
+                    //         destE[0 * 3 + c1] += tmp;
+                    //         destE[2 * 3 + c1] += flag * (I * tmp);
+                    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
+                    //         destE[1 * 3 + c1] += tmp;
+                    //         destE[3 * 3 + c1] += flag * (-I * tmp);
+                    //     }
+                    // }
                 }
             }
         }
@@ -2271,12 +2678,14 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                        subgrid[0] * y + x + cb * subgrid_vol_cb) *
                                                           12;
 
-                    for (int c1 = 0; c1 < 3; c1++) {
-                        destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                        destE[2 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
-                        destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                        destE[3 * 3 + c1] += flag * (I * srcO[1 * 3 + c1]);
-                    }
+                    U33_P22((fast_complex *) srcO, (fast_complex *) destE, flag);
+
+                    // for (int c1 = 0; c1 < 3; c1++) {
+                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+                    //     destE[2 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
+                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+                    //     destE[3 * 3 + c1] += flag * (I * srcO[1 * 3 + c1]);
+                    // }
                 }
             }
         }
@@ -2316,16 +2725,18 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                           subgrid[0] * y + x + cb * subgrid_vol_cb) *
                              9;
 
-                    for (int c1 = 0; c1 < 3; c1++) {
-                        for (int c2 = 0; c2 < 3; c2++) {
-                            tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
-                            destE[0 * 3 + c1] += tmp;
-                            destE[2 * 3 + c1] -= flag * (tmp);
-                            tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
-                            destE[1 * 3 + c1] += tmp;
-                            destE[3 * 3 + c1] -= flag * (tmp);
-                        }
-                    }
+                    U33_P23((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
+                            flag);
+                    // for (int c1 = 0; c1 < 3; c1++) {
+                    //     for (int c2 = 0; c2 < 3; c2++) {
+                    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
+                    //         destE[0 * 3 + c1] += tmp;
+                    //         destE[2 * 3 + c1] -= flag * (tmp);
+                    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
+                    //         destE[1 * 3 + c1] += tmp;
+                    //         destE[3 * 3 + c1] -= flag * (tmp);
+                    //     }
+                    // }
                 }
             }
         }
@@ -2350,12 +2761,14 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                        subgrid[0] * y + x + cb * subgrid_vol_cb) *
                                                           12;
 
-                    for (int c1 = 0; c1 < 3; c1++) {
-                        destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                        destE[2 * 3 + c1] += flag * (srcO[0 * 3 + c1]);
-                        destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                        destE[3 * 3 + c1] += flag * (srcO[1 * 3 + c1]);
-                    }
+                    U33_P24((fast_complex *) srcO, (fast_complex *) destE, flag);
+
+                    // for (int c1 = 0; c1 < 3; c1++) {
+                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
+                    //     destE[2 * 3 + c1] += flag * (srcO[0 * 3 + c1]);
+                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
+                    //     destE[3 * 3 + c1] += flag * (srcO[1 * 3 + c1]);
+                    // }
                 }
             }
         }
