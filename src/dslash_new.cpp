@@ -1417,39 +1417,57 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
     double *resv_x_f = new double[len_x_f * 6 * 2];
     double *send_x_b = new double[len_x_f * 6 * 2];
+
+    int len_x_b = (subgrid[1] * subgrid[2] * subgrid[3] + 1 - cb) >> 1;
+
+    double *resv_x_b = new double[len_x_b * 6 * 2];
+    double *send_x_f = new double[len_x_b * 6 * 2];
+
     if (N_sub[0] != 1) {
         // for (int i = 0; i < len_x_f * 6 * 2; i++) {
         //     send_x_b[i] = 0;
         // }
 
-        int cont = 0;
+        int cont_a = 0;
+        int cont_b = 0;
 
         for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int y = 0; y < subgrid[1]; y++) {
 
-                    if ((y + z + t + x_p) % 2 == cb) {
-                        continue;
+                    if ((y + z + t + x_p) % 2 != cb) {
+
+                        int x = 0;
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+                        int b = cont_a * 6;
+                        cont_a += 1;
+
+                        U33_P1((fast_complex *) srcO, send_x_b, flag, b);
+                    } else {
+
+                        int x = subgrid[0] - 1;
+
+                        complex<double> *AO =
+                            U.A[0] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                      subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                      (1 - cb) * subgrid_vol_cb) *
+                                         9;
+
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+
+                        int b = cont_b * 6;
+                        cont_b += 1;
+
+                        U33_P2((fast_complex *) AO, (fast_complex *) srcO, send_x_f, flag, b);
                     }
-                    int x = 0;
-                    complex<double> tmp;
-                    complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                     x + (1 - cb) * subgrid_vol_cb) *
-                                                        12;
-                    int b = cont * 6;
-                    cont += 1;
-
-                    U33_P1((fast_complex *) srcO, send_x_b, flag, b);
-
-                    // for (int c2 = 0; c2 < 3; c2++) {
-                    //     tmp = -(srcO[0 * 3 + c2] - flag * I * srcO[3 * 3 + c2]) * half;
-                    //     send_x_b[b * 2 + (0 * 3 + c2) * 2 + 0] = tmp.real();
-                    //     send_x_b[b * 2 + (0 * 3 + c2) * 2 + 1] = tmp.imag();
-                    //     tmp = -(srcO[1 * 3 + c2] - flag * I * srcO[2 * 3 + c2]) * half;
-                    //     send_x_b[b * 2 + (1 * 3 + c2) * 2 + 0] = tmp.real();
-                    //     send_x_b[b * 2 + (1 * 3 + c2) * 2 + 1] = tmp.imag();
-                    // }
                 }
             }
         }
@@ -1458,63 +1476,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                   &reqs[8 * rank]);
         MPI_Irecv(resv_x_f, len_x_f * 6 * 2, MPI_DOUBLE, nodenum_x_f, 8 * nodenum_x_f,
                   MPI_COMM_WORLD, &reqr[8 * nodenum_x_f]);
-    }
-
-    int len_x_b = (subgrid[1] * subgrid[2] * subgrid[3] + 1 - cb) >> 1;
-
-    double *resv_x_b = new double[len_x_b * 6 * 2];
-    double *send_x_f = new double[len_x_b * 6 * 2];
-
-    if (N_sub[0] != 1) {
-        // for (int i = 0; i < len_x_b * 6 * 2; i++) {
-        //     send_x_f[i] = 0;
-        // }
-
-        int cont = 0;
-
-        for (int t = 0; t < subgrid[3]; t++) {
-            for (int z = 0; z < subgrid[2]; z++) {
-                for (int y = 0; y < subgrid[1]; y++) {
-                    if (((y + z + t + x_p) % 2) != cb) {
-                        continue;
-                    }
-
-                    int x = subgrid[0] - 1;
-
-                    complex<double> *AO = U.A[0] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                    subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                    x + (1 - cb) * subgrid_vol_cb) *
-                                                       9;
-
-                    complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                     x + (1 - cb) * subgrid_vol_cb) *
-                                                        12;
-
-                    complex<double> tmp;
-
-                    int b = cont * 6;
-                    cont += 1;
-
-                    U33_P2((fast_complex *) AO, (fast_complex *) srcO, send_x_f, flag, b);
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-                    //         tmp = -(srcO[0 * 3 + c2] + flag * I * srcO[3 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-
-                    //         send_x_f[b * 2 + (0 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_x_f[b * 2 + (0 * 3 + c1) * 2 + 1] += tmp.imag();
-
-                    //         tmp = -(srcO[1 * 3 + c2] + flag * I * srcO[2 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-
-                    //         send_x_f[b * 2 + (1 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_x_f[b * 2 + (1 * 3 + c1) * 2 + 1] += tmp.imag();
-                    //     }
-                    // }
-                }
-            }
-        }
 
         MPI_Isend(send_x_f, len_x_b * 6 * 2, MPI_DOUBLE, nodenum_x_f, 8 * rank + 1, MPI_COMM_WORLD,
                   &reqs[8 * rank + 1]);
@@ -1526,10 +1487,13 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
     double *resv_y_f = new double[len_y_f * 6 * 2];
     double *send_y_b = new double[len_y_f * 6 * 2];
+
+    int len_y_b = subgrid[0] * subgrid[2] * subgrid[3];
+
+    double *resv_y_b = new double[len_y_b * 6 * 2];
+    double *send_y_f = new double[len_y_b * 6 * 2];
+
     if (N_sub[1] != 1) {
-        // for (int i = 0; i < len_y_f * 6 * 2; i++) {
-        //     send_y_b[i] = 0;
-        // }
 
         int cont = 0;
 
@@ -1537,7 +1501,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int x = 0; x < subgrid[0]; x++) {
                     int y = 0;
-                    complex<double> tmp;
                     complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
                                                      subgrid[0] * subgrid[1] * z + subgrid[0] * y +
                                                      x + (1 - cb) * subgrid_vol_cb) *
@@ -1548,14 +1511,19 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     U33_P3((fast_complex *) srcO, send_y_b, flag, b);
 
-                    // for (int c2 = 0; c2 < 3; c2++) {
-                    //     tmp = -(srcO[0 * 3 + c2] + flag * srcO[3 * 3 + c2]) * half;
-                    //     send_y_b[b * 2 + (0 * 3 + c2) * 2 + 0] = tmp.real();
-                    //     send_y_b[b * 2 + (0 * 3 + c2) * 2 + 1] = tmp.imag();
-                    //     tmp = -(srcO[1 * 3 + c2] - flag * srcO[2 * 3 + c2]) * half;
-                    //     send_y_b[b * 2 + (1 * 3 + c2) * 2 + 0] = tmp.real();
-                    //     send_y_b[b * 2 + (1 * 3 + c2) * 2 + 1] = tmp.imag();
-                    // }
+                    y = subgrid[1] - 1;
+
+                    srcO = src.A +
+                           (subgrid[0] * subgrid[1] * subgrid[2] * t + subgrid[0] * subgrid[1] * z +
+                            subgrid[0] * y + x + (1 - cb) * subgrid_vol_cb) *
+                               12;
+
+                    complex<double> *AO = U.A[1] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                                    subgrid[0] * subgrid[1] * z + subgrid[0] * y +
+                                                    x + (1 - cb) * subgrid_vol_cb) *
+                                                       9;
+
+                    U33_P4((fast_complex *) AO, (fast_complex *) srcO, send_y_f, flag, b);
                 }
             }
         }
@@ -1564,59 +1532,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                   &reqs[8 * rank + 2]);
         MPI_Irecv(resv_y_f, len_y_f * 6 * 2, MPI_DOUBLE, nodenum_y_f, 8 * nodenum_y_f + 2,
                   MPI_COMM_WORLD, &reqr[8 * nodenum_y_f + 2]);
-    }
-
-    int len_y_b = subgrid[0] * subgrid[2] * subgrid[3];
-
-    double *resv_y_b = new double[len_y_b * 6 * 2];
-    double *send_y_f = new double[len_y_b * 6 * 2];
-
-    if (N_sub[1] != 1) {
-
-        // for (int i = 0; i < len_y_b * 6 * 2; i++) {
-        //     send_y_f[i] = 0;
-        // }
-
-        int cont = 0;
-        for (int t = 0; t < subgrid[3]; t++) {
-            for (int z = 0; z < subgrid[2]; z++) {
-                for (int x = 0; x < subgrid[0]; x++) {
-                    complex<double> tmp;
-
-                    int y = subgrid[1] - 1;
-
-                    complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                     x + (1 - cb) * subgrid_vol_cb) *
-                                                        12;
-
-                    complex<double> *AO = U.A[1] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                    subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                    x + (1 - cb) * subgrid_vol_cb) *
-                                                       9;
-
-                    int b = cont * 6;
-                    cont += 1;
-
-                    U33_P4((fast_complex *) AO, (fast_complex *) srcO, send_y_f, flag, b);
-
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-
-                    //         tmp = -(srcO[0 * 3 + c2] - flag * srcO[3 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-                    //         send_y_f[b * 2 + (0 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_y_f[b * 2 + (0 * 3 + c1) * 2 + 1] += tmp.imag();
-                    //         tmp = -(srcO[1 * 3 + c2] + flag * srcO[2 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-                    //         send_y_f[b * 2 + (1 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_y_f[b * 2 + (1 * 3 + c1) * 2 + 1] += tmp.imag();
-                    //     }
-                    // }
-                }
-            }
-        }
-
         MPI_Isend(send_y_f, len_y_b * 6 * 2, MPI_DOUBLE, nodenum_y_f, 8 * rank + 3, MPI_COMM_WORLD,
                   &reqs[8 * rank + 3]);
         MPI_Irecv(resv_y_b, len_y_b * 6 * 2, MPI_DOUBLE, nodenum_y_b, 8 * nodenum_y_b + 3,
@@ -1627,10 +1542,13 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
     double *resv_z_f = new double[len_z_f * 6 * 2];
     double *send_z_b = new double[len_z_f * 6 * 2];
+
+    int len_z_b = subgrid[0] * subgrid[1] * subgrid[3];
+
+    double *resv_z_b = new double[len_z_b * 6 * 2];
+    double *send_z_f = new double[len_z_b * 6 * 2];
+
     if (N_sub[2] != 1) {
-        // for (int i = 0; i < len_z_f * 6 * 2; i++) {
-        //     send_z_b[i] = 0;
-        // }
 
         int cont = 0;
 
@@ -1639,7 +1557,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                 for (int x = 0; x < subgrid[0]; x++) {
                     int z = 0;
 
-                    complex<double> tmp;
                     complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
                                                      subgrid[0] * subgrid[1] * z + subgrid[0] * y +
                                                      x + (1 - cb) * subgrid_vol_cb) *
@@ -1649,15 +1566,19 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                     cont += 1;
 
                     U33_P5((fast_complex *) srcO, send_z_b, flag, b);
+                    z = subgrid[2] - 1;
 
-                    // for (int c2 = 0; c2 < 3; c2++) {
-                    //     tmp = -(srcO[0 * 3 + c2] - flag * I * srcO[2 * 3 + c2]) * half;
-                    //     send_z_b[b * 2 + (0 * 3 + c2) * 2 + 0] += tmp.real();
-                    //     send_z_b[b * 2 + (0 * 3 + c2) * 2 + 1] += tmp.imag();
-                    //     tmp = -(srcO[1 * 3 + c2] + flag * I * srcO[3 * 3 + c2]) * half;
-                    //     send_z_b[b * 2 + (1 * 3 + c2) * 2 + 0] += tmp.real();
-                    //     send_z_b[b * 2 + (1 * 3 + c2) * 2 + 1] += tmp.imag();
-                    // }
+                    srcO = src.A +
+                           (subgrid[0] * subgrid[1] * subgrid[2] * t + subgrid[0] * subgrid[1] * z +
+                            subgrid[0] * y + x + (1 - cb) * subgrid_vol_cb) *
+                               12;
+
+                    complex<double> *AO = U.A[2] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                                    subgrid[0] * subgrid[1] * z + subgrid[0] * y +
+                                                    x + (1 - cb) * subgrid_vol_cb) *
+                                                       9;
+
+                    U33_P6((fast_complex *) AO, (fast_complex *) srcO, send_z_f, flag, b);
                 }
             }
         }
@@ -1666,58 +1587,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                   &reqs[8 * rank + 4]);
         MPI_Irecv(resv_z_f, len_z_f * 6 * 2, MPI_DOUBLE, nodenum_z_f, 8 * nodenum_z_f + 4,
                   MPI_COMM_WORLD, &reqr[8 * nodenum_z_f + 4]);
-    }
-
-    int len_z_b = subgrid[0] * subgrid[1] * subgrid[3];
-
-    double *resv_z_b = new double[len_z_b * 6 * 2];
-    double *send_z_f = new double[len_z_b * 6 * 2];
-    if (N_sub[2] != 1) {
-
-        // for (int i = 0; i < len_z_b * 6 * 2; i++) {
-        //     send_z_f[i] = 0;
-        // }
-
-        int cont = 0;
-        for (int t = 0; t < subgrid[3]; t++) {
-            for (int y = 0; y < subgrid[1]; y++) {
-                for (int x = 0; x < subgrid[0]; x++) {
-                    complex<double> tmp;
-
-                    int z = subgrid[2] - 1;
-
-                    complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                     x + (1 - cb) * subgrid_vol_cb) *
-                                                        12;
-
-                    complex<double> *AO = U.A[2] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                    subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                    x + (1 - cb) * subgrid_vol_cb) *
-                                                       9;
-
-                    int b = cont * 6;
-                    cont += 1;
-
-                    U33_P6((fast_complex *) AO, (fast_complex *) srcO, send_z_f, flag, b);
-
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-
-                    //         tmp = -(srcO[0 * 3 + c2] + flag * I * srcO[2 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-                    //         send_z_f[b * 2 + (0 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_z_f[b * 2 + (0 * 3 + c1) * 2 + 1] += tmp.imag();
-                    //         tmp = -(srcO[1 * 3 + c2] - flag * I * srcO[3 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-                    //         send_z_f[b * 2 + (1 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_z_f[b * 2 + (1 * 3 + c1) * 2 + 1] += tmp.imag();
-                    //     }
-                    // }
-                }
-            }
-        }
-
         MPI_Isend(send_z_f, len_z_b * 6 * 2, MPI_DOUBLE, nodenum_z_f, 8 * rank + 5, MPI_COMM_WORLD,
                   &reqs[8 * rank + 5]);
         MPI_Irecv(resv_z_b, len_z_b * 6 * 2, MPI_DOUBLE, nodenum_z_b, 8 * nodenum_z_b + 5,
@@ -1728,10 +1597,13 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
     double *resv_t_f = new double[len_t_f * 6 * 2];
     double *send_t_b = new double[len_t_f * 6 * 2];
+
+    int len_t_b = subgrid[0] * subgrid[1] * subgrid[2];
+
+    double *resv_t_b = new double[len_t_b * 6 * 2];
+    double *send_t_f = new double[len_t_b * 6 * 2];
+
     if (N_sub[3] != 1) {
-        // for (int i = 0; i < len_t_f * 6 * 2; i++) {
-        //     send_t_b[i] = 0;
-        // }
 
         int cont = 0;
 
@@ -1740,7 +1612,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                 for (int x = 0; x < subgrid[0]; x++) {
                     int t = 0;
 
-                    complex<double> tmp;
                     complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
                                                      subgrid[0] * subgrid[1] * z + subgrid[0] * y +
                                                      x + (1 - cb) * subgrid_vol_cb) *
@@ -1750,15 +1621,19 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                     cont += 1;
 
                     U33_P7((fast_complex *) srcO, send_t_b, flag, b);
+                    t = subgrid[3] - 1;
 
-                    // for (int c2 = 0; c2 < 3; c2++) {
-                    //     tmp = -(srcO[0 * 3 + c2] - flag * srcO[2 * 3 + c2]) * half;
-                    //     send_t_b[b * 2 + (0 * 3 + c2) * 2 + 0] += tmp.real();
-                    //     send_t_b[b * 2 + (0 * 3 + c2) * 2 + 1] += tmp.imag();
-                    //     tmp = -(srcO[1 * 3 + c2] - flag * srcO[3 * 3 + c2]) * half;
-                    //     send_t_b[b * 2 + (1 * 3 + c2) * 2 + 0] += tmp.real();
-                    //     send_t_b[b * 2 + (1 * 3 + c2) * 2 + 1] += tmp.imag();
-                    // }
+                    srcO = src.A +
+                           (subgrid[0] * subgrid[1] * subgrid[2] * t + subgrid[0] * subgrid[1] * z +
+                            subgrid[0] * y + x + (1 - cb) * subgrid_vol_cb) *
+                               12;
+
+                    complex<double> *AO = U.A[3] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                                    subgrid[0] * subgrid[1] * z + subgrid[0] * y +
+                                                    x + (1 - cb) * subgrid_vol_cb) *
+                                                       9;
+
+                    U33_P8((fast_complex *) AO, (fast_complex *) srcO, send_t_f, flag, b);
                 }
             }
         }
@@ -1767,58 +1642,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                   &reqs[8 * rank + 6]);
         MPI_Irecv(resv_t_f, len_t_f * 6 * 2, MPI_DOUBLE, nodenum_t_f, 8 * nodenum_t_f + 6,
                   MPI_COMM_WORLD, &reqr[8 * nodenum_t_f + 6]);
-    }
-
-    int len_t_b = subgrid[0] * subgrid[1] * subgrid[2];
-
-    double *resv_t_b = new double[len_t_b * 6 * 2];
-    double *send_t_f = new double[len_t_b * 6 * 2];
-    if (N_sub[3] != 1) {
-
-        // for (int i = 0; i < len_t_b * 6 * 2; i++) {
-        //     send_t_f[i] = 0;
-        // }
-
-        int cont = 0;
-        for (int z = 0; z < subgrid[2]; z++) {
-            for (int y = 0; y < subgrid[1]; y++) {
-                for (int x = 0; x < subgrid[0]; x++) {
-                    complex<double> tmp;
-
-                    int t = subgrid[3] - 1;
-
-                    complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                     x + (1 - cb) * subgrid_vol_cb) *
-                                                        12;
-
-                    complex<double> *AO = U.A[3] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                    subgrid[0] * subgrid[1] * z + subgrid[0] * y +
-                                                    x + (1 - cb) * subgrid_vol_cb) *
-                                                       9;
-
-                    int b = cont * 6;
-                    cont += 1;
-
-                    U33_P8((fast_complex *) AO, (fast_complex *) srcO, send_t_f, flag, b);
-
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-
-                    //         tmp = -(srcO[0 * 3 + c2] + flag * srcO[2 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-                    //         send_t_f[b * 2 + (0 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_t_f[b * 2 + (0 * 3 + c1) * 2 + 1] += tmp.imag();
-                    //         tmp = -(srcO[1 * 3 + c2] + flag * srcO[3 * 3 + c2]) * half *
-                    //               conj(AO[c2 * 3 + c1]);
-                    //         send_t_f[b * 2 + (1 * 3 + c1) * 2 + 0] += tmp.real();
-                    //         send_t_f[b * 2 + (1 * 3 + c1) * 2 + 1] += tmp.imag();
-                    //     }
-                    // }
-                }
-            }
-        }
-
         MPI_Isend(send_t_f, len_t_b * 6 * 2, MPI_DOUBLE, nodenum_t_f, 8 * rank + 7, MPI_COMM_WORLD,
                   &reqs[8 * rank + 7]);
         MPI_Irecv(resv_t_b, len_t_b * 6 * 2, MPI_DOUBLE, nodenum_t_b, 8 * nodenum_t_b + 7,
@@ -2169,10 +1992,7 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                         destE = dest.A + (idx + cb * subgrid_vol_cb) * 12;
 
-                        AE = U.A[3] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                       subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                       cb * subgrid_vol_cb) *
-                                          9;
+                        AE = U.A[3] + (idx + cb * subgrid_vol_cb) * 9;
 
                         U33_P15((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
                                 flag);
@@ -2315,7 +2135,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     complex<double> *destE;
                     complex<double> *AE;
-                    complex<double> tmp;
 
                     int x = subgrid[0] - 1;
 
@@ -2334,26 +2153,12 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                              9;
                     U33_P17((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
                             flag);
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-                    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[0 * 3 + c1] += tmp;
-                    //         destE[3 * 3 + c1] += flag * (I * tmp);
-                    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[1 * 3 + c1] += tmp;
-                    //         destE[2 * 3 + c1] += flag * (I * tmp);
-                    //     }
-                    // }
                 }
             }
         }
 
         MPI_Wait(&reqs[8 * rank], &stas[8 * rank]);
-
-    } // if(N_sub[0]!=1)
-
-    //    delete[] send_x_b;
-    //    delete[] resv_x_f;
+    }
 
     if (N_sub[0] != 1) {
 
@@ -2379,22 +2184,12 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                           12;
 
                     U33_P18((fast_complex *) srcO, (fast_complex *) destE, flag);
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                    //     destE[3 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
-                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                    //     destE[2 * 3 + c1] += flag * (-I * srcO[1 * 3 + c1]);
-                    // }
                 }
             }
         }
 
         MPI_Wait(&reqs[8 * rank + 1], &stas[8 * rank + 1]);
-
-    } // if(N_sub[0]!=1)
-
-    //    delete[] send_x_f;
-    //    delete[] resv_x_b;
+    }
 
     if (N_sub[1] != 1) {
 
@@ -2405,7 +2200,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int x = 0; x < subgrid[0]; x++) {
 
-                    complex<double> tmp;
                     complex<double> *destE;
                     complex<double> *AE;
 
@@ -2427,16 +2221,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     U33_P19((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
                             flag);
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-                    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[0 * 3 + c1] += tmp;
-                    //         destE[3 * 3 + c1] += flag * (tmp);
-                    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[1 * 3 + c1] += tmp;
-                    //         destE[2 * 3 + c1] -= flag * (tmp);
-                    //     }
-                    // }
                 }
             }
         }
@@ -2467,21 +2251,12 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                           12;
 
                     U33_P20((fast_complex *) srcO, (fast_complex *) destE, flag);
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                    //     destE[3 * 3 + c1] -= flag * srcO[0 * 3 + c1];
-                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                    //     destE[2 * 3 + c1] += flag * srcO[1 * 3 + c1];
-                    // }
                 }
             }
         }
 
         MPI_Wait(&reqs[8 * rank + 3], &stas[8 * rank + 3]);
     }
-
-    //    delete[] send_y_f;
-    //    delete[] resv_y_b;
 
     if (N_sub[2] != 1) {
 
@@ -2492,7 +2267,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int x = 0; x < subgrid[0]; x++) {
 
-                    complex<double> tmp;
                     complex<double> *destE;
                     complex<double> *AE;
 
@@ -2514,27 +2288,12 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     U33_P21((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
                             flag);
-
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-                    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[0 * 3 + c1] += tmp;
-                    //         destE[2 * 3 + c1] += flag * (I * tmp);
-                    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[1 * 3 + c1] += tmp;
-                    //         destE[3 * 3 + c1] += flag * (-I * tmp);
-                    //     }
-                    // }
                 }
             }
         }
 
         MPI_Wait(&reqs[8 * rank + 4], &stas[8 * rank + 4]);
-
-    } // if(N_sub[2]!=1)
-
-    //    delete[] send_z_b;
-    //    delete[] resv_z_f;
+    }
 
     if (N_sub[2] != 1) {
 
@@ -2555,23 +2314,12 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                           12;
 
                     U33_P22((fast_complex *) srcO, (fast_complex *) destE, flag);
-
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                    //     destE[2 * 3 + c1] += flag * (-I * srcO[0 * 3 + c1]);
-                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                    //     destE[3 * 3 + c1] += flag * (I * srcO[1 * 3 + c1]);
-                    // }
                 }
             }
         }
 
         MPI_Wait(&reqs[8 * rank + 5], &stas[8 * rank + 5]);
-
-    } // if (N_sub[2] != 1)
-
-    // delete[] send_z_f;
-    // delete[] resv_z_b;
+    }
 
     if (N_sub[3] != 1) {
 
@@ -2582,7 +2330,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
             for (int y = 0; y < subgrid[1]; y++) {
                 for (int x = 0; x < subgrid[0]; x++) {
 
-                    complex<double> tmp;
                     complex<double> *destE;
                     complex<double> *AE;
                     int t = subgrid[3] - 1;
@@ -2603,16 +2350,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                     U33_P23((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
                             flag);
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     for (int c2 = 0; c2 < 3; c2++) {
-                    //         tmp = srcO[0 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[0 * 3 + c1] += tmp;
-                    //         destE[2 * 3 + c1] -= flag * (tmp);
-                    //         tmp = srcO[1 * 3 + c2] * AE[c1 * 3 + c2];
-                    //         destE[1 * 3 + c1] += tmp;
-                    //         destE[3 * 3 + c1] -= flag * (tmp);
-                    //     }
-                    // }
                 }
             }
         }
@@ -2638,13 +2375,6 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                                                           12;
 
                     U33_P24((fast_complex *) srcO, (fast_complex *) destE, flag);
-
-                    // for (int c1 = 0; c1 < 3; c1++) {
-                    //     destE[0 * 3 + c1] += srcO[0 * 3 + c1];
-                    //     destE[2 * 3 + c1] += flag * (srcO[0 * 3 + c1]);
-                    //     destE[1 * 3 + c1] += srcO[1 * 3 + c1];
-                    //     destE[3 * 3 + c1] += flag * (srcO[1 * 3 + c1]);
-                    // }
                 }
             }
         }
