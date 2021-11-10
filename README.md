@@ -1,9 +1,9 @@
 # latticechina
 
 ```bash
-#compile app for example
+#compile
 cd src
-source /public1/soft/modules/module.sh
-module load mpi/intel/2017.5
+source ./setenv.sh
 make clean
-make
+make -B -j
+make run
