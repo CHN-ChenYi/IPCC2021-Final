@@ -1887,6 +1887,7 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     if (N_sub[1] != 1) {
+        int idx = 0;
         for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int y = 0; y < subgrid[1] - 1; y++) {
@@ -1896,48 +1897,29 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                         complex<double> *destE;
                         complex<double> *AE, *AO;
 
-                        int f_y = (y + 1) % subgrid[1];
-
                         complex<double> *srcO =
-                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                     subgrid[0] * subgrid[1] * z + subgrid[0] * f_y + x +
-                                     (1 - cb) * subgrid_vol_cb) *
-                                        12;
+                            src.A + (idx + subgrid[0] + (1 - cb) * subgrid_vol_cb) * 12;
 
-                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                          cb * subgrid_vol_cb) *
-                                             12;
+                        destE = dest.A + (idx + cb * subgrid_vol_cb) * 12;
 
-                        AE = U.A[1] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                       subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                       cb * subgrid_vol_cb) *
-                                          9;
+                        AE = U.A[1] + (idx + cb * subgrid_vol_cb) * 9;
 
                         U33_P11((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
                                 flag);
 
-                        int b_y = (y + subgrid[1]) % subgrid[1];
+                        srcO = src.A + (idx + (1 - cb) * subgrid_vol_cb) * 12;
 
-                        srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                        subgrid[0] * subgrid[1] * z + subgrid[0] * b_y + x +
-                                        (1 - cb) * subgrid_vol_cb) *
-                                           12;
+                        destE = dest.A + (idx + subgrid[0] + cb * subgrid_vol_cb) * 12;
 
-                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                          subgrid[0] * subgrid[1] * z + subgrid[0] * (y + 1) + x +
-                                          cb * subgrid_vol_cb) *
-                                             12;
-
-                        AO = U.A[1] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                       subgrid[0] * subgrid[1] * z + subgrid[0] * b_y + x +
-                                       (1 - cb) * subgrid_vol_cb) *
-                                          9;
+                        AO = U.A[1] + (idx + (1 - cb) * subgrid_vol_cb) * 9;
 
                         U33_P12((fast_complex *) AO, (fast_complex *) srcO, (fast_complex *) destE,
                                 flag);
+
+                        ++idx;
                     }
                 }
+                idx += subgrid[0];
             }
         }
     } else {
@@ -2037,59 +2019,41 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     if (N_sub[2] != 1) {
+        int idx = 0;
         for (int t = 0; t < subgrid[3]; t++) {
             for (int z = 0; z < subgrid[2] - 1; z++) {
                 for (int y = 0; y < subgrid[1]; y++) {
                     for (int x = 0; x < subgrid[0]; x++) {
 
-                        int f_z = (z + 1) % subgrid[2];
-
                         // complex<double> tmp;
 
                         complex<double> *srcO =
-                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                     subgrid[0] * subgrid[1] * f_z + subgrid[0] * y + x +
-                                     (1 - cb) * subgrid_vol_cb) *
-                                        12;
+                            src.A +
+                            (idx + subgrid[1] * subgrid[0] + (1 - cb) * subgrid_vol_cb) * 12;
 
-                        complex<double> *destE =
-                            dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                      subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                      cb * subgrid_vol_cb) *
-                                         12;
+                        complex<double> *destE = dest.A + (idx + cb * subgrid_vol_cb) * 12;
 
-                        complex<double> *AE = U.A[2] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                                        subgrid[0] * subgrid[1] * z +
-                                                        subgrid[0] * y + x + cb * subgrid_vol_cb) *
-                                                           9;
+                        complex<double> *AE = U.A[2] + (idx + cb * subgrid_vol_cb) * 9;
 
                         U33_P13((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
                                 flag);
 
                         complex<double> *AO;
 
-                        int b_z = (z + subgrid[2]) % subgrid[2];
+                        srcO = src.A + (idx + (1 - cb) * subgrid_vol_cb) * 12;
 
-                        srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                        subgrid[0] * subgrid[1] * b_z + subgrid[0] * y + x +
-                                        (1 - cb) * subgrid_vol_cb) *
-                                           12;
+                        destE = dest.A + (idx + subgrid[1] * subgrid[0] + cb * subgrid_vol_cb) * 12;
 
-                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                          subgrid[0] * subgrid[1] * (z + 1) + subgrid[0] * y + x +
-                                          cb * subgrid_vol_cb) *
-                                             12;
-
-                        AO = U.A[2] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                       subgrid[0] * subgrid[1] * b_z + subgrid[0] * y + x +
-                                       (1 - cb) * subgrid_vol_cb) *
-                                          9;
+                        AO = U.A[2] + (idx + (1 - cb) * subgrid_vol_cb) * 9;
 
                         U33_P14((fast_complex *) AO, (fast_complex *) srcO, (fast_complex *) destE,
                                 flag);
+
+                        ++idx;
                     }
                 }
             }
+            idx += subgrid[1] * subgrid[0];
         }
     } else {
         int z_u = (N_sub[2] == 1) ? subgrid[2] : subgrid[2] - 1;
@@ -2190,27 +2154,20 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
     }
 
     if (N_sub[3] != 1) {
+        int idx = 0;
         for (int t = 0; t < subgrid[3] - 1; t++) {
             for (int z = 0; z < subgrid[2]; z++) {
                 for (int y = 0; y < subgrid[1]; y++) {
                     for (int x = 0; x < subgrid[0]; x++) {
 
-                        complex<double> tmp;
                         complex<double> *destE;
                         complex<double> *AE;
 
-                        int f_t = (t + 1) % subgrid[3];
+                        complex<double> *srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] +
+                                                         idx + (1 - cb) * subgrid_vol_cb) *
+                                                            12;
 
-                        complex<double> *srcO =
-                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * f_t +
-                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                     (1 - cb) * subgrid_vol_cb) *
-                                        12;
-
-                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
-                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                          cb * subgrid_vol_cb) *
-                                             12;
+                        destE = dest.A + (idx + cb * subgrid_vol_cb) * 12;
 
                         AE = U.A[3] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
                                        subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
@@ -2222,25 +2179,17 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
 
                         complex<double> *AO;
 
-                        int b_t = (t + subgrid[3]) % subgrid[3];
+                        srcO = src.A + (idx + (1 - cb) * subgrid_vol_cb) * 12;
 
-                        srcO = src.A + (subgrid[0] * subgrid[1] * subgrid[2] * b_t +
-                                        subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                        (1 - cb) * subgrid_vol_cb) *
-                                           12;
+                        destE =
+                            dest.A +
+                            (subgrid[0] * subgrid[1] * subgrid[2] + idx + cb * subgrid_vol_cb) * 12;
 
-                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * (t + 1) +
-                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                          cb * subgrid_vol_cb) *
-                                             12;
-
-                        AO = U.A[3] + (subgrid[0] * subgrid[1] * subgrid[2] * b_t +
-                                       subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
-                                       (1 - cb) * subgrid_vol_cb) *
-                                          9;
+                        AO = U.A[3] + (idx + (1 - cb) * subgrid_vol_cb) * 9;
 
                         U33_P16((fast_complex *) AO, (fast_complex *) srcO, (fast_complex *) destE,
                                 flag);
+                        ++idx;
                     }
                 }
             }
