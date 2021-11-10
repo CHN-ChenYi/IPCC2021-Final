@@ -26,10 +26,7 @@ fmt:
 	@#cd .. && git ls-files -- '*.cpp' '*.h' | xargs clang-format -i -style=file
 	find .. -name "*.cpp" -or -name "*.h" | xargs clang-format -i -style=file
 
-run:
-	# mpirun -n 4 ./main  0.005  UNIT  24 24 24 96   12 12 24 48
-	sh setenv.sh
-	make -B
+run: all
 	sbatch sub.sh
 	squeue
 
