@@ -1940,10 +1940,100 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                 }
             }
         }
-    }
-    else
-    {
+    } else {
+        int y_u = (N_sub[1] == 1) ? subgrid[1] : subgrid[1] - 1;
+        for (int t = 0; t < subgrid[3]; t++) {
+            for (int z = 0; z < subgrid[2]; z++) {
+                for (int y = 0; y < y_u; y++) {
+                    for (int x = 0; x < subgrid[0]; x++) {
 
+                        complex<double> tmp;
+                        complex<double> *destE;
+                        complex<double> *AE;
+
+                        int f_y = (y + 1) % subgrid[1];
+
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                     subgrid[0] * subgrid[1] * z + subgrid[0] * f_y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+
+                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                          cb * subgrid_vol_cb) *
+                                             12;
+
+                        AE = U.A[1] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                       subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                       cb * subgrid_vol_cb) *
+                                          9;
+
+                        U33_P11((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
+                                flag);
+                        // for (int c1 = 0; c1 < 3; c1++) {
+                        //     for (int c2 = 0; c2 < 3; c2++) {
+                        //         tmp = -(srcO[0 * 3 + c2] + flag * srcO[3 * 3 + c2]) * half *
+                        //               AE[c1 * 3 + c2];
+                        //         destE[0 * 3 + c1] += tmp;
+                        //         destE[3 * 3 + c1] += flag * (tmp);
+                        //         tmp = -(srcO[1 * 3 + c2] - flag * srcO[2 * 3 + c2]) * half *
+                        //               AE[c1 * 3 + c2];
+                        //         destE[1 * 3 + c1] += tmp;
+                        //         destE[2 * 3 + c1] -= flag * (tmp);
+                        //     }
+                        // }
+                    }
+                }
+            }
+        }
+
+        int y_d = (N_sub[1] == 1) ? 0 : 1;
+        for (int t = 0; t < subgrid[3]; t++) {
+            for (int z = 0; z < subgrid[2]; z++) {
+                for (int y = y_d; y < subgrid[1]; y++) {
+                    for (int x = 0; x < subgrid[0]; x++) {
+                        complex<double> *destE;
+                        complex<double> *AO;
+                        complex<double> tmp;
+
+                        int b_y = (y - 1 + subgrid[1]) % subgrid[1];
+
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                     subgrid[0] * subgrid[1] * z + subgrid[0] * b_y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+
+                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                          cb * subgrid_vol_cb) *
+                                             12;
+
+                        AO = U.A[1] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                       subgrid[0] * subgrid[1] * z + subgrid[0] * b_y + x +
+                                       (1 - cb) * subgrid_vol_cb) *
+                                          9;
+
+                        U33_P12((fast_complex *) AO, (fast_complex *) srcO, (fast_complex *) destE,
+                                flag);
+
+                        // for (int c1 = 0; c1 < 3; c1++) {
+                        //     for (int c2 = 0; c2 < 3; c2++) {
+                        //         tmp = -(srcO[0 * 3 + c2] - flag * srcO[3 * 3 + c2]) * half *
+                        //               conj(AO[c2 * 3 + c1]);
+                        //         destE[0 * 3 + c1] += tmp;
+                        //         destE[3 * 3 + c1] -= flag * (tmp);
+                        //         tmp = -(srcO[1 * 3 + c2] + flag * srcO[2 * 3 + c2]) * half *
+                        //               conj(AO[c2 * 3 + c1]);
+                        //         destE[1 * 3 + c1] += tmp;
+                        //         destE[2 * 3 + c1] += flag * (tmp);
+                        //     }
+                        // }
+                    }
+                }
+            }
+        }
     }
 
     if (N_sub[2] != 1) {
@@ -2001,10 +2091,102 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                 }
             }
         }
-    }
-    else
-    {
+    } else {
+        int z_u = (N_sub[2] == 1) ? subgrid[2] : subgrid[2] - 1;
+        for (int t = 0; t < subgrid[3]; t++) {
+            for (int z = 0; z < z_u; z++) {
+                for (int y = 0; y < subgrid[1]; y++) {
+                    for (int x = 0; x < subgrid[0]; x++) {
 
+                        int f_z = (z + 1) % subgrid[2];
+
+                        complex<double> tmp;
+
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                     subgrid[0] * subgrid[1] * f_z + subgrid[0] * y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+
+                        complex<double> *destE =
+                            dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                      subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                      cb * subgrid_vol_cb) *
+                                         12;
+
+                        complex<double> *AE = U.A[2] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                                        subgrid[0] * subgrid[1] * z +
+                                                        subgrid[0] * y + x + cb * subgrid_vol_cb) *
+                                                           9;
+
+                        U33_P13((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
+                                flag);
+
+                        // for (int c1 = 0; c1 < 3; c1++) {
+                        //     for (int c2 = 0; c2 < 3; c2++) {
+
+                        //         tmp = -(srcO[0 * 3 + c2] - flag * I * srcO[2 * 3 + c2]) * half *
+                        //               AE[c1 * 3 + c2];
+                        //         destE[0 * 3 + c1] += tmp;
+                        //         destE[2 * 3 + c1] += flag * (I * tmp);
+                        //         tmp = -(srcO[1 * 3 + c2] + flag * I * srcO[3 * 3 + c2]) * half *
+                        //               AE[c1 * 3 + c2];
+                        //         destE[1 * 3 + c1] += tmp;
+                        //         destE[3 * 3 + c1] += flag * (-I * tmp);
+                        //     }
+                        // }
+                    }
+                }
+            }
+        }
+
+        int z_d = (N_sub[2] == 1) ? 0 : 1;
+        for (int t = 0; t < subgrid[3]; t++) {
+            for (int z = z_d; z < subgrid[2]; z++) {
+                for (int y = 0; y < subgrid[1]; y++) {
+                    for (int x = 0; x < subgrid[0]; x++) {
+
+                        complex<double> tmp;
+                        complex<double> *destE;
+                        complex<double> *AO;
+
+                        int b_z = (z - 1 + subgrid[2]) % subgrid[2];
+
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                     subgrid[0] * subgrid[1] * b_z + subgrid[0] * y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+
+                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                          cb * subgrid_vol_cb) *
+                                             12;
+
+                        AO = U.A[2] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                       subgrid[0] * subgrid[1] * b_z + subgrid[0] * y + x +
+                                       (1 - cb) * subgrid_vol_cb) *
+                                          9;
+
+                        U33_P14((fast_complex *) AO, (fast_complex *) srcO, (fast_complex *) destE,
+                                flag);
+
+                        // for (int c1 = 0; c1 < 3; c1++) {
+                        //     for (int c2 = 0; c2 < 3; c2++) {
+                        //         tmp = -(srcO[0 * 3 + c2] + flag * I * srcO[2 * 3 + c2]) * half *
+                        //               conj(AO[c2 * 3 + c1]);
+                        //         destE[0 * 3 + c1] += tmp;
+                        //         destE[2 * 3 + c1] += flag * (-I * tmp);
+                        //         tmp = -(srcO[1 * 3 + c2] - flag * I * srcO[3 * 3 + c2]) * half *
+                        //               conj(AO[c2 * 3 + c1]);
+                        //         destE[1 * 3 + c1] += tmp;
+                        //         destE[3 * 3 + c1] += flag * (I * tmp);
+                        //     }
+                        // }
+                    }
+                }
+            }
+        }
     }
 
     if (N_sub[3] != 1) {
@@ -2063,10 +2245,104 @@ void DslashoffdNew(lattice_fermion &src, lattice_fermion &dest, lattice_gauge &U
                 }
             }
         }
-    }
-    else
-    {
-        
+    } else {
+        int t_u = (N_sub[3] == 1) ? subgrid[3] : subgrid[3] - 1;
+
+        for (int t = 0; t < t_u; t++) {
+            for (int z = 0; z < subgrid[2]; z++) {
+                for (int y = 0; y < subgrid[1]; y++) {
+                    for (int x = 0; x < subgrid[0]; x++) {
+
+                        complex<double> tmp;
+                        complex<double> *destE;
+                        complex<double> *AE;
+
+                        int f_t = (t + 1) % subgrid[3];
+
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * f_t +
+                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+
+                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                          cb * subgrid_vol_cb) *
+                                             12;
+
+                        AE = U.A[3] + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                       subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                       cb * subgrid_vol_cb) *
+                                          9;
+
+                        U33_P15((fast_complex *) AE, (fast_complex *) srcO, (fast_complex *) destE,
+                                flag);
+
+                        // for (int c1 = 0; c1 < 3; c1++) {
+                        //     for (int c2 = 0; c2 < 3; c2++) {
+                        //         tmp = -(srcO[0 * 3 + c2] - flag * srcO[2 * 3 + c2]) * half *
+                        //               AE[c1 * 3 + c2];
+                        //         destE[0 * 3 + c1] += tmp;
+                        //         destE[2 * 3 + c1] -= flag * (tmp);
+                        //         tmp = -(srcO[1 * 3 + c2] - flag * srcO[3 * 3 + c2]) * half *
+                        //               AE[c1 * 3 + c2];
+                        //         destE[1 * 3 + c1] += tmp;
+                        //         destE[3 * 3 + c1] -= flag * (tmp);
+                        //     }
+                        // }
+                    }
+                }
+            }
+        }
+
+        int t_d = (N_sub[3] == 1) ? 0 : 1;
+        for (int t = t_d; t < subgrid[3]; t++) {
+            for (int z = 0; z < subgrid[2]; z++) {
+                for (int y = 0; y < subgrid[1]; y++) {
+                    for (int x = 0; x < subgrid[0]; x++) {
+
+                        complex<double> *destE;
+                        complex<double> *AO;
+
+                        int b_t = (t - 1 + subgrid[3]) % subgrid[3];
+
+                        complex<double> *srcO =
+                            src.A + (subgrid[0] * subgrid[1] * subgrid[2] * b_t +
+                                     subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                     (1 - cb) * subgrid_vol_cb) *
+                                        12;
+
+                        destE = dest.A + (subgrid[0] * subgrid[1] * subgrid[2] * t +
+                                          subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                          cb * subgrid_vol_cb) *
+                                             12;
+
+                        AO = U.A[3] + (subgrid[0] * subgrid[1] * subgrid[2] * b_t +
+                                       subgrid[0] * subgrid[1] * z + subgrid[0] * y + x +
+                                       (1 - cb) * subgrid_vol_cb) *
+                                          9;
+
+                        complex<double> tmp;
+
+                        U33_P16((fast_complex *) AO, (fast_complex *) srcO, (fast_complex *) destE,
+                                flag);
+
+                        // for (int c1 = 0; c1 < 3; c1++) {
+                        //     for (int c2 = 0; c2 < 3; c2++) {
+                        //         tmp = -(srcO[0 * 3 + c2] + flag * srcO[2 * 3 + c2]) * half *
+                        //               conj(AO[c2 * 3 + c1]);
+                        //         destE[0 * 3 + c1] += tmp;
+                        //         destE[2 * 3 + c1] += flag * (tmp);
+                        //         tmp = -(srcO[1 * 3 + c2] + flag * srcO[3 * 3 + c2]) * half *
+                        //               conj(AO[c2 * 3 + c1]);
+                        //         destE[1 * 3 + c1] += tmp;
+                        //         destE[3 * 3 + c1] += flag * (tmp);
+                        //     }
+                        // }
+                    }
+                }
+            }
+        }
     }
 
     // double myend = MPI_Wtime();
